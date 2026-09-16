@@ -10,7 +10,7 @@ Timestamps
 ----------
 Every date column is written as ``YYYY-MM-DD HH:MM:SS`` in the reference timezone named by
 ``extraction_helpers.REFERENCE_TIMEZONE``, so that a date means the same thing here as it
-does in the Facebook, Instagram and Google tables.
+does in every other table of the study.
 
 The two export formats say different amounts about the clock. The txt format names the
 zone outright (``Datum: 2026-05-02 10:09:50 UTC``); the json format writes the same moment
