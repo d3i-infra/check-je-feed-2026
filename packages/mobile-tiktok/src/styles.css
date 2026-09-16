@@ -99,5 +99,9 @@ input:focus + .mt-box { box-shadow: 0 0 0 3px var(--mt-primary-light); }
   background-size: 20px 20px;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%234272EF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
+/* The watch-history figure: bars in the primary blue, grid and labels in grey. */
+.mt-bar { fill: var(--mt-primary); }
+.mt-grid { stroke: #EEEEEE; stroke-width: 1; }
+.mt-xlabel, .mt-ylabel, .mt-ytitle { font-family: "Nunito Sans", sans-serif; font-size: 9px; fill: #666666; }
 @keyframes mt-spin { to { transform: rotate(360deg); } }
 .mt-spinner { width: 32px; height: 32px; border: 3px solid #E3EAFD; border-top-color: #4272EF; border-radius: 50%; animation: mt-spin 0.8s linear infinite; }
