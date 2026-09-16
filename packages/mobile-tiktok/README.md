@@ -172,7 +172,11 @@ case-insensitive substring test on every cell; the desktop builds a regular expr
 The phone shows one table at a time in config order; the desktop shows one table at a
 time in title order. The phone shows the over-time figure on the watch-history table,
 driven by the same shared config as the desktop's visualizations, but has no cell
-tooltip and no show/hide-table toggle. The payload is byte-identical to the desktop's:
+tooltip and no show/hide-table toggle. The phone draws bars where the desktop draws an
+area, zero-fills empty buckets, buckets by week under a year and by month above it (the
+desktop's ladder differs outside one to two and a half years), and the desktop's
+comments wordcloud is not reproduced on the phone. The payload is byte-identical to the
+desktop's:
 every table in config order, every non-deleted row keyed by the raw column names, and
 a "deleted row count" string per table, whatever the screen was showing.
 

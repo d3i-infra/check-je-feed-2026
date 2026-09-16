@@ -18,8 +18,10 @@ Checks performed
    correct types when present.
 5. UI-content locale coverage: every participant-facing text bundle (a table's
    ``title`` / ``description``, each ``headers`` column label, each
-   visualization ``title``) is a locale dict of strings that carries the
-   default UI locale.  See ``validate_ui_content``.
+   visualization ``title``, and each visualization's ``group.label`` /
+   ``values[k].label`` when given as a locale dict rather than a bare string)
+   is a locale dict of strings that carries the default UI locale.  See
+   ``validate_ui_content``.
 6. Registry cross-check: every ``extractor`` value in ``tables`` exists as a
    key in the live ``EXTRACTOR_REGISTRY``.
 7. Extractor uniqueness: each extractor name appears exactly once.
@@ -127,9 +129,12 @@ def _iter_ui_text_bundles(tables: list[Any]) -> Iterator[tuple[str, Any]]:
     """Yield ``(label, value)`` for every participant-facing text bundle in *tables*.
 
     A "text bundle" is what the researcher authors as ``{"en": ..., "nl": ...}``:
-    a table's ``title`` and ``description``, every ``headers`` column label, and
-    every visualization ``title``.  The value is yielded as-is — deciding whether
-    it is well-formed is the caller's job.
+    a table's ``title`` and ``description``, every ``headers`` column label,
+    every visualization ``title``, and a visualization's ``group.label`` /
+    ``values[k].label`` when authored as a locale dict — those two may also be
+    a bare string (the desktop's ``zLabel``), which is not a text bundle and is
+    never yielded here.  The value is yielded as-is — deciding whether it is
+    well-formed is the caller's job.
 
     ``platform_info`` is never visited: its ``languages`` list is DDP *export*
     metadata (which language a participant's exported files are in) and has
@@ -151,8 +156,22 @@ def _iter_ui_text_bundles(tables: list[Any]) -> Iterator[tuple[str, Any]]:
         visualizations = entry.get("visualizations")
         if isinstance(visualizations, list):
             for vi, viz in enumerate(visualizations):
-                if isinstance(viz, dict) and "title" in viz:
+                if not isinstance(viz, dict):
+                    continue
+                if "title" in viz:
                     yield f"{prefix}.visualizations[{vi}].title", viz["title"]
+                # group.label and each values[k].label are optional and may be
+                # a bare string (Label = Localised | string) rather than a
+                # locale dict; only the dict shape carries a locale-coverage
+                # obligation, so a bare string is never visited here.
+                group = viz.get("group")
+                if isinstance(group, dict) and isinstance(group.get("label"), dict):
+                    yield f"{prefix}.visualizations[{vi}].group.label", group["label"]
+                values = viz.get("values")
+                if isinstance(values, list):
+                    for ki, value in enumerate(values):
+                        if isinstance(value, dict) and isinstance(value.get("label"), dict):
+                            yield f"{prefix}.visualizations[{vi}].values[{ki}].label", value["label"]
 
 
 def _aggregate(labels: list[str]) -> str:

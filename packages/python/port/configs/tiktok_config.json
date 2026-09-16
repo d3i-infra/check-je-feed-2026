@@ -81,6 +81,7 @@
           "values": [
             {
               "aggregate": "count",
+              "addZeroes": true,
               "label": {
                 "en": "Number of videos",
                 "nl": "Aantal video's"

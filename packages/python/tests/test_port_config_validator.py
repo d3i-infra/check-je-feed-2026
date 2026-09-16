@@ -101,6 +101,64 @@ def test_visualization_titles_are_checked_too():
     assert "visualizations" in errors[0]
 
 
+def test_visualization_group_label_without_english_is_an_error():
+    tables = [
+        _table(
+            visualizations=[
+                {
+                    "title": {"en": "Videos over time", "nl": "Video's in de tijd"},
+                    "type": "area",
+                    "group": {"column": "Date", "label": {"nl": "Alleen Nederlands"}},
+                }
+            ]
+        )
+    ]
+
+    errors, _ = validate_ui_content(tables)
+
+    assert len(errors) == 1
+    assert "visualizations[0].group.label" in errors[0]
+
+
+def test_visualization_values_label_without_english_is_an_error():
+    tables = [
+        _table(
+            visualizations=[
+                {
+                    "title": {"en": "Videos over time", "nl": "Video's in de tijd"},
+                    "type": "area",
+                    "group": {"column": "Date"},
+                    "values": [{"aggregate": "count", "label": {"nl": "Alleen Nederlands"}}],
+                }
+            ]
+        )
+    ]
+
+    errors, _ = validate_ui_content(tables)
+
+    assert len(errors) == 1
+    assert "visualizations[0].values[0].label" in errors[0]
+
+
+def test_bare_string_group_and_values_labels_are_not_an_error():
+    tables = [
+        _table(
+            visualizations=[
+                {
+                    "title": {"en": "Videos over time", "nl": "Video's in de tijd"},
+                    "type": "area",
+                    "group": {"column": "Date", "label": "Date"},
+                    "values": [{"aggregate": "count", "label": "Count"}],
+                }
+            ]
+        )
+    ]
+
+    errors, _ = validate_ui_content(tables)
+
+    assert errors == []
+
+
 # --- seed case 3: empty translation is deliberate ----------------------------
 
 

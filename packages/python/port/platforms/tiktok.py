@@ -488,7 +488,7 @@ def watch_history_to_df(reader: ZipArchiveReader, errors: Counter, validation) -
                 "label": {"en": "Date", "nl": "Datum"}
               },
               "values": [
-                {"aggregate": "count", "label": {"en": "Number of videos", "nl": "Aantal video's"}}
+                {"aggregate": "count", "addZeroes": true, "label": {"en": "Number of videos", "nl": "Aantal video's"}}
               ]
             }
           ]

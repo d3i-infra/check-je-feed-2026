@@ -59,5 +59,6 @@ def test_watch_history_carries_the_over_time_visualization():
     assert viz[0]["type"] == "area"
     assert viz[0]["group"]["column"] == "Date"
     assert viz[0]["group"]["dateFormat"] == "auto"
+    assert viz[0]["values"][0]["addZeroes"] is True
     for node in (viz[0]["title"], viz[0]["group"]["label"], viz[0]["values"][0]["label"]):
         assert set(node) >= {"en", "nl"} and node["en"] and node["nl"]

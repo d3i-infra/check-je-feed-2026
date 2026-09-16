@@ -1,4 +1,4 @@
-import { ReviewState, TableState } from "./state";
+import { ReviewState, TableState, Buckets } from "./state";
 import { TABLES, text, label } from "../config";
 import type { TableConfig, VisualizationConfig } from "../config";
 import { t, formatCount, Locale } from "../text";
@@ -170,6 +170,11 @@ export class Screens {
   private selectAllEl: HTMLInputElement | null = null;
   private controlsEl: HTMLElement | null = null;
   private figureEl: HTMLElement | null = null;
+  // The buckets object (by reference — buckets() returns its cache) and title
+  // updateFigure last drew, so a render with neither changed can skip the
+  // SVG rebuild instead of tearing it down and redrawing it every time.
+  private drawnBuckets: Buckets | null = null;
+  private drawnTitle = "";
   private pageBars: HTMLElement[] = [];
   private rowsEl: HTMLElement | null = null;
   private renderedPage = -1;
@@ -197,6 +202,8 @@ export class Screens {
     this.selectAllEl = null;
     this.controlsEl = null;
     this.figureEl = null;
+    this.drawnBuckets = null;
+    this.drawnTitle = "";
     this.pageBars = [];
     this.rowsEl = null;
     this.renderedPage = -1;
@@ -426,14 +433,20 @@ export class Screens {
     if (!box) return;
     const v = this.chartConfig(ts);
     const b = v && v.group ? state.buckets(i, v.group.column) : null;
+    if (!v || !b) { box.innerHTML = ""; box.style.display = "none"; box.removeAttribute("data-role"); this.drawnBuckets = null; return; }
+    const title = text(v.title, this.locale);
+    // buckets() returns the cached object by reference, so identity tells us
+    // nothing changed; a full rebuild here would replace the SVG (and any
+    // in-progress focus/interaction with it) on every render.
+    if (b === this.drawnBuckets && title === this.drawnTitle && box.getAttribute("data-role") === "figure") return;
     box.innerHTML = "";
-    if (!v || !b || b.keys.length === 0) { box.style.display = "none"; box.removeAttribute("data-role"); return; }
     box.style.display = "";
     box.setAttribute("data-role", "figure");
-    const title = text(v.title, this.locale);
     const yLabel = label(v.values && v.values[0] ? v.values[0].label : undefined, "", this.locale);
-    box.appendChild(el("h3", "font-body text-bodymedium font-bold mb-1", title));
+    box.appendChild(el("h3", "font-body text-base font-bold mb-1", title));
     box.appendChild(buildChart(b, title, yLabel));
+    this.drawnBuckets = b;
+    this.drawnTitle = title;
   }
 
   // The desktop's pagination.tsx: chevrons either side of a plain "page of

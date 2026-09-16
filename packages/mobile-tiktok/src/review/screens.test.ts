@@ -752,10 +752,36 @@ test("the figure follows deletions and search without a rebuild", () => {
   expect((figure(root) as HTMLElement).querySelectorAll("rect.mt-bar").length).toBe(9);
 });
 
+test("the figure drops a bucket after its rows are deleted", () => {
+  const { root, s } = setup();
+  const state = new ReviewState([watchHistory(90)]);
+  s.tables(state);
+  const bars = (root.querySelector("[data-role=figure]") as HTMLElement).querySelectorAll("rect.mt-bar").length;
+  // Delete every row of the last month (rows 60..89), which empties the last weekly bucket.
+  for (let r = 60; r < 90; r++) state.deleteRow(0, r);
+  s.tables(state);
+  const after = (root.querySelector("[data-role=figure]") as HTMLElement).querySelectorAll("rect.mt-bar").length;
+  expect(after).toBeLessThan(bars);
+});
+
 test("the figure adds no div with an inline height and no table-shaped elements", () => {
   const { root, s } = setup();
   s.tables(new ReviewState([watchHistory(30)]));
   const f = figure(root) as HTMLElement;
   expect(f.style.height).toBe("");
   expect(f.querySelectorAll(".mt-row, .mt-box, [data-role=rows], [data-role=summary]").length).toBe(0);
+});
+
+test("updateFigure does not rebuild the SVG when nothing changed", () => {
+  const { root, s } = setup();
+  const state = new ReviewState([watchHistory(90)]);
+  s.tables(state);
+  const before = figure(root)!.querySelector("svg");
+  s.tables(state);
+  const same = figure(root)!.querySelector("svg");
+  expect(same).toBe(before);
+  state.setQuery(0, "2024-02");
+  s.tables(state);
+  const after = figure(root)!.querySelector("svg");
+  expect(after).not.toBe(before);
 });

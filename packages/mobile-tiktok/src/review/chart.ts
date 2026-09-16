@@ -9,6 +9,10 @@ const W = 320, H = 160;
 const LEFT = 40, RIGHT = 8, TOP = 8, BOTTOM = 28;
 const PLOT_W = W - LEFT - RIGHT, PLOT_H = H - TOP - BOTTOM;
 const MAX_X_LABELS = 6;
+// Above this many buckets a bar chart is unreadable and the DOM cost is not
+// worth it (a multi-year daily-shaped history could otherwise ask for
+// thousands of <rect> elements); draw only the axes and the span instead.
+const MAX_BARS = 400;
 
 function node(tag: string, attrs: { [k: string]: string }): SVGElement {
   const e = document.createElementNS(SVG_NS, tag);
@@ -31,9 +35,30 @@ function niceStep(max: number): number {
   return Math.max(1, f * pow);
 }
 
-export function buildChart(b: Buckets, title: string, yLabel: string): SVGElement {
-  const svg = node("svg", { viewBox: "0 0 " + W + " " + H, "class": "w-full h-auto block", role: "img", "aria-label": title });
+// `title` is no longer read here: the SVG is aria-hidden (the h3 above it
+// names the figure), but the parameter stays so call sites read the same as
+// buildChart(buckets, title, yLabel) everywhere else.
+export function buildChart(b: Buckets, _title: string, yLabel: string): SVGElement {
+  // aria-hidden: the h3 above the figure already names it and the table
+  // beside it carries the data, so the SVG itself is decorative to a screen
+  // reader rather than a second, redundant announcement.
+  const svg = node("svg", {
+    viewBox: "0 0 " + W + " " + H,
+    "class": "w-full h-40 block",
+    preserveAspectRatio: "xMidYMid meet",
+    "aria-hidden": "true",
+  });
   const n = b.keys.length;
+
+  // Above MAX_BARS a bar per bucket is unreadable and costly to build; draw
+  // only the axes and the span the buckets cover.
+  if (n > MAX_BARS) {
+    svg.appendChild(node("line", { x1: String(LEFT), x2: String(W - RIGHT), y1: String(TOP + PLOT_H), y2: String(TOP + PLOT_H), "class": "mt-grid" }));
+    svg.appendChild(node("line", { x1: String(LEFT), x2: String(LEFT), y1: String(TOP), y2: String(TOP + PLOT_H), "class": "mt-grid" }));
+    svg.appendChild(textNode(W / 2, H - BOTTOM + 14, "mt-xlabel", b.keys[0] + " … " + b.keys[n - 1], "middle"));
+    return svg;
+  }
+
   let max = 0;
   for (let i = 0; i < n; i++) if (b.counts[i] > max) max = b.counts[i];
   const step = max > 0 ? niceStep(max) : 1;

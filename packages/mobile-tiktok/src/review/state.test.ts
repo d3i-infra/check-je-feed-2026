@@ -440,3 +440,29 @@ test("an empty bucket result is cached until the next invalidation", () => {
   s.setQuery(0, "x");
   expect(s.tables[0].bucketsCache).toBeUndefined();
 });
+
+test("the bucket cache is keyed by column", () => {
+  const t: Table = { id: "t", columns: ["Date", "Other"], rows: [["2026-01-05 10:00:00", "2026-03-02 10:00:00"]] };
+  const s = new ReviewState([t]);
+  const a = s.buckets(0, "Date");
+  const b = s.buckets(0, "Other");
+  expect(a && a.keys).toEqual(["2026-01-05"]);
+  expect(b && b.keys).toEqual(["2026-03-02"]);
+  expect(s.buckets(0, "Date")).toEqual(a);
+});
+
+test("buckets discard cells outside the accepted year window", () => {
+  // The regex is shape-only, so "9999-12-31" and "0001-01-01" parse as dates
+  // but fall outside MIN_DAY..MAX_DAY and must not build tens of thousands of
+  // empty buckets. "2026-02-30" is shape-valid too and normalises (Date.UTC)
+  // to 2026-03-02, which is inside the window, so it counts normally.
+  const s = new ReviewState([datedList([
+    "9999-12-31 00:00:00",
+    "2026-01-05 10:00:00",
+    "0001-01-01 00:00:00",
+    "2026-02-30 10:00:00",
+  ])]);
+  const b = s.buckets(0, "Date");
+  expect(b && b.keys[0]).toBe("2026-01-05");
+  expect(b && b.counts.reduce((a, c) => a + c, 0)).toBe(2);
+});

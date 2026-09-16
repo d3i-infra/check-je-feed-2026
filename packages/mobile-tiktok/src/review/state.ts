@@ -8,9 +8,18 @@ export const PAGE_SIZE = 25;
 // that does not start like a date is left out rather than guessed at.
 const DAY_PREFIX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}/;
 const MS_PER_DAY = 86400000;
-// Histories shorter than this bucket by week; the desktop's own ladder
-// switches at 300 days, so the two sides agree from a year upward.
+// Histories shorter than this bucket by week; the desktop's own ladder is
+// day above 10 days, month above 300, quarter above 900 and year above 3650,
+// so the two sides agree only between one year and about two and a half;
+// below a year the phone draws weeks where the desktop draws days, above 900
+// days months where the desktop draws quarters.
 const WEEK_BELOW_DAYS = 365;
+// DAY_PREFIX is shape-only and dayNumber's Date.UTC normalises a malformed
+// cell (like day 30 of February) rather than rejecting it, so a shape-valid
+// but out-of-range year would otherwise build tens of thousands of buckets;
+// TikTok exports live well inside this window.
+const MIN_DAY = Date.UTC(2000, 0, 1) / MS_PER_DAY;
+const MAX_DAY = Date.UTC(2100, 0, 1) / MS_PER_DAY;
 
 export interface Buckets { unit: "month" | "week"; keys: string[]; counts: number[] }
 
@@ -58,9 +67,9 @@ export interface TableState {
   undoStack: number[][];
   // Cached alongside visibleCache and dropped with it. undefined = not
   // computed yet; null = computed and there was nothing to bucket. The cache
-  // is per table and assumes one chart column per table; a second column
-  // would need a keyed cache.
+  // holds the result for the last column asked for; bucketsColumn names it.
   bucketsCache: Buckets | null | undefined;
+  bucketsColumn: string;
 }
 
 function rowMatches(row: string[], needle: string): boolean {
@@ -87,6 +96,7 @@ export class ReviewState {
       visibleCache: null,
       undoStack: [],
       bucketsCache: undefined,
+      bucketsColumn: "",
     }));
   }
 
@@ -274,9 +284,9 @@ export class ReviewState {
   // the cached one: read it, do not mutate it.
   buckets(tableIndex: number, column: string): Buckets | null {
     const ts = this.tables[tableIndex];
-    if (ts.bucketsCache !== undefined) return ts.bucketsCache;
+    if (ts.bucketsCache !== undefined && ts.bucketsColumn === column) return ts.bucketsCache;
     const col = ts.table.columns.indexOf(column);
-    if (col < 0) { ts.bucketsCache = null; return null; }
+    if (col < 0) { ts.bucketsCache = null; ts.bucketsColumn = column; return null; }
     const rows = ts.table.rows;
     const visible = this.visible(tableIndex);
     // Pass 1: per-day counts keyed by day number, plus the span.
@@ -286,15 +296,13 @@ export class ReviewState {
       const cell = rows[visible[k]][col];
       if (cell === undefined || !DAY_PREFIX.test(cell)) continue;
       const dn = dayNumber(cell);
-      // Date.UTC never yields NaN for digit-shaped input; kept as a cheap belt
-      // for a future parser change.
-      if (dn !== dn) continue;
+      if (dn < MIN_DAY || dn > MAX_DAY) continue;
       perDay[dn] = (perDay[dn] || 0) + 1;
       if (dn < minDn) minDn = dn;
       if (dn > maxDn) maxDn = dn;
       any = true;
     }
-    if (!any) { ts.bucketsCache = null; return null; }
+    if (!any) { ts.bucketsCache = null; ts.bucketsColumn = column; return null; }
     const keys: string[] = [];
     const counts: number[] = [];
     let unit: "month" | "week";
@@ -318,6 +326,7 @@ export class ReviewState {
       }
     }
     ts.bucketsCache = { unit: unit, keys: keys, counts: counts };
+    ts.bucketsColumn = column;
     return ts.bucketsCache;
   }
 }

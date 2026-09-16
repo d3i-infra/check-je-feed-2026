@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { runExtraction, runExtractionAsync, extractTable, extractUsername } from "./extract";
 import { openExport } from "./archive";
-import { TABLES } from "./config";
+import { TABLES, label } from "./config";
 import type { Export } from "./archive";
 
 function jsonExport(data: unknown): Export { return { kind: "json", data }; }
@@ -105,4 +105,9 @@ test("the watch-history config carries one over-time chart", () => {
   expect(viz.length).toBe(1);
   expect(viz[0].type).toBe("area");
   expect(viz[0].group && viz[0].group.column).toBe("Date");
+});
+
+test("label returns the bare-string label as-is and falls back when undefined", () => {
+  expect(label("Count", "fallback", "nl")).toBe("Count");
+  expect(label(undefined, "fallback", "nl")).toBe("fallback");
 });

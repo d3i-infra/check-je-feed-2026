@@ -124,6 +124,29 @@ test("search, select all, Delete and Undo", async ({ page }) => {
   await expect(app.locator(".mt-row")).toHaveCount(before);
 });
 
+test("the watch-history figure is shown and follows a deletion", async ({ page }) => {
+  const app = await open(page);
+  await pick(page, app, "json_en.zip");
+  const select = app.locator("[data-role=table-select]");
+  const watchValue = await select.locator("option", { hasText: "Watch history" }).first().getAttribute("value");
+  await select.selectOption(watchValue as string);
+  const figure = app.locator("[data-role=figure]");
+  await expect(figure).toBeVisible();
+  await expect(figure.locator("h3")).toHaveText("Videos watched over time");
+  const barsBefore = await figure.locator("rect.mt-bar").count();
+  expect(barsBefore).toBeGreaterThan(0);
+  await app.locator("input[type=search]").fill("2026-10-25");
+  await expect(app.locator("[data-role=summary]")).toContainText("2 / 6 rows");
+  await app.locator("thead .mt-box").click();
+  await app.locator("[data-action=remove-selected]").click();
+  await app.locator("input[type=search]").fill("");
+  // No search active after the deletion: watch history has two columns, and
+  // updateSummary (screens.ts) prints "{kept} rows" plain, not "x / y", once
+  // ts.matches is null again, so this is not the "2 / 6 rows" phrasing above.
+  await expect(app.locator("[data-role=summary]")).toContainText("2 columns, 4 rows");
+  await expect(figure).toBeVisible();
+});
+
 test("decline records the literal", async ({ page }) => {
   const app = await open(page);
   await pick(page, app, "txt_en.zip");
