@@ -47,9 +47,24 @@ test("activity summary uses Dutch labels and priority keys", () => {
     videosWatchedToTheEndSinceAccountRegistration: 12, videosCommentedOnSinceAccountRegistration: "3",
   } } } });
   expect(extractTable("tiktok_activity_summary", exp, counter()).rows).toEqual([
-    ["Video's die je helemaal hebt bekeken sinds je registratie", "12"],
-    ["Video's waarop je hebt gereageerd sinds je registratie", "3"],
+    ["Video's die je helemaal hebt bekeken sinds je je account hebt gemaakt", "12"],
+    ["Video's waarop je hebt gereageerd sinds je je account hebt gemaakt", "3"],
   ]);
+});
+
+test("activity summary labels are informal (je/jouw): the participants are sixteen", () => {
+  const exp = jsonExport({ "Your Activity": { "Activity Summary": { ActivitySummaryMap: {
+    videosWatchedToTheEndSinceAccountRegistration: 12,
+    videosCommentedOnSinceAccountRegistration: 3,
+    videosSharedSinceAccountRegistration: 4,
+  } } } });
+  const rows = extractTable("tiktok_activity_summary", exp, counter()).rows;
+  expect(rows.length).toBe(3);
+  const formal: string[] = [];
+  for (const [metric] of rows) {
+    if (/\b(u|uw|alstublieft)\b/i.test(metric)) formal.push(metric);
+  }
+  expect(formal).toEqual([]);
 });
 
 test("comments redact emails and the username", () => {

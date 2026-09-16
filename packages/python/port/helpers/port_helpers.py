@@ -300,7 +300,7 @@ def generate_questionnaire() -> d3i_props.PropsUIPromptQuestionnaire:
     mc_question = props.Translatable(
         translations={
             "en": "How would you rate your overall experience?",
-            "nl": "Hoe zou je je algemene ervaring beoordelen?",
+            "nl": "Hoe beoordeel je je algemene ervaring?",
             "de": "Wie würden Sie Ihre Gesamterfahrung bewerten?",
             "it": "Come valuterebbe la sua esperienza complessiva?",
             "es": "¿Cómo valoraría su experiencia general?",

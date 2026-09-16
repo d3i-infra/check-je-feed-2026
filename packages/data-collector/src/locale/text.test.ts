@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import { readFileSync, readdirSync } from 'fs'
+import { join, relative, sep } from 'path'
 import { Translator, MISSING_TRANSLATION } from '@eyra/feldspar'
 import TextBundle from '@eyra/feldspar'
 import { DEFAULT_UI_LOCALE } from './policy'
@@ -130,30 +130,47 @@ describe('resolveAll', () => {
   })
 })
 
-describe('consent-viz Dutch register', () => {
-  // Every participant-facing Dutch string in the consent-viz components is
-  // informal (je/jouw): the study's participants are sixteen. Mirrors
+describe('component Dutch register', () => {
+  // Every participant-facing Dutch string in src/components is informal
+  // (je/jouw): the study's participants are sixteen. Mirrors
   // packages/python/tests/test_nl_register.py.
-  const SOURCES = [
-    '../components/consent_form_viz/consent_form_viz.tsx',
-    '../components/consent_form_viz/table_selector.tsx',
-    '../components/consent_form_viz/visualization_plugin/figure.tsx'
-  ]
-  const NL_STRING = /(?:['"]nl['"]\s*,\s*|\bnl:\s*)['"]([^'"]*)['"]/g
+  const COMPONENTS_ROOT = join(__dirname, '../components')
+  // Not this study's participant copy: only the e2etest_multifile platform
+  // uses PayloadFiles, so the multi-file prompt is unreachable here.
+  const ALLOWLIST = new Set<string>(['components/file_input_multiple/file_input_multiple.tsx'])
+  const NL_STRING = /(?:'nl'\s*,\s*|"nl"\s*,\s*|\bnl:\s*)(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g
   const FORMAL = /\b(u|uw|alstublieft)\b/i
+
+  function walk (dir: string): string[] {
+    const out: string[] = []
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        out.push(...walk(full))
+      } else if (/\.(tsx|ts)$/.test(entry.name) && !entry.name.includes('.test.')) {
+        out.push(full)
+      }
+    }
+    return out
+  }
 
   it('has no formal Dutch in participant-facing copy', () => {
     const offenders: string[] = []
-    for (const relPath of SOURCES) {
-      const text = readFileSync(join(__dirname, relPath), 'utf8')
+    let scanned = 0
+    for (const filePath of walk(COMPONENTS_ROOT)) {
+      const relPath = 'components/' + relative(COMPONENTS_ROOT, filePath).split(sep).join('/')
+      if (ALLOWLIST.has(relPath)) continue
+      scanned++
+      const text = readFileSync(filePath, 'utf8')
       let match
       while ((match = NL_STRING.exec(text)) !== null) {
-        const nl = match[1]
+        const nl = match[1] ?? match[2] ?? ''
         if (FORMAL.test(nl)) {
           offenders.push(`${relPath}: ${nl.slice(0, 60)}`)
         }
       }
     }
+    expect(scanned).toBeGreaterThan(0)
     expect(offenders).toEqual([])
   })
 })

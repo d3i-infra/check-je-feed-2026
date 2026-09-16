@@ -3,7 +3,7 @@
  "tables": [
   {
    "id": "tiktok_activity_summary",
-   "data_frame": "{\"Metric\":{\"0\":\"Video's die je helemaal hebt bekeken sinds je registratie\",\"1\":\"Video's waarop je hebt gereageerd sinds je registratie\",\"2\":\"Video's die je hebt gedeeld sinds je registratie\"},\"Count\":{\"0\":1234,\"1\":\"7\",\"2\":0}}"
+   "data_frame": "{\"Metric\":{\"0\":\"Video's die je helemaal hebt bekeken sinds je je account hebt gemaakt\",\"1\":\"Video's waarop je hebt gereageerd sinds je je account hebt gemaakt\",\"2\":\"Video's die je hebt gedeeld sinds je je account hebt gemaakt\"},\"Count\":{\"0\":1234,\"1\":\"7\",\"2\":0}}"
   },
   {
    "id": "tiktok_watch_history",
