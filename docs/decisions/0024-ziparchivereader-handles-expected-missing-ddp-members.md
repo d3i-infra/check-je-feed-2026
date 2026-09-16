@@ -45,7 +45,7 @@ Platform extraction reads archive members through `ZipArchiveReader`. `json()` /
 - The one spelling normalisation is a single substitution on the requested name, `'` → `_`: Drive-delivered Meta exports write `who_you_ve_followed.json` where device downloads write `who_you've_followed.json`. Both spellings are tried at the exact and path-boundary steps; two members differing only in that spelling are still ambiguous. The ambiguity counter names the request: `AmbiguousMemberMatch(<requested name>)`.
 - Inventory discovery — resolving the member list a `ZipArchiveReader` matches against — lives in `ArchiveSet`/`SingleArchiveSource` (`archive_set.py`), not in `ZipArchiveReader`; the reader only resolves member paths and delegates reads to `self._source.read_member()`. Reuse the already-discovered member list (`ValidateInput.archive_members` / `ArchiveSet.members`) instead of re-opening any part just to list members during extraction.
 - Do not reach for the legacy path-era helpers (`extract_file_from_zip`, `json_dumper`, `read_json_from_file`) in extraction code — they are the cascade this decision removed and survive only for backward compatibility.
-- WhatsApp is the standing exception: its input is a single chat export pre-parsed into a DataFrame, not a multi-file DDP, so it has no member inventory to consult.
+- A platform whose input is a single pre-parsed file has no member inventory to consult and is outside this record; this fork has no such platform.
 
 ## Why
 
