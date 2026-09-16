@@ -104,8 +104,8 @@ Releases are created in `releases/`.
 Generate a config for a platform, then edit it to suit your study:
 
 ```sh
-pnpm generate-config instagram
-# edit packages/python/port/configs/instagram_config.json
+pnpm generate-config <platform>
+# edit packages/python/port/configs/<platform>_config.json
 ```
 
 To add a new platform, copy `packages/python/port/platforms/example.py` as your starting point.
@@ -153,7 +153,7 @@ These are two unrelated things and are **never synced**:
   zip are in. It is a parsing concern.
 
 A participant can perfectly well read the UI in Spanish while donating a
-Dutch-language Instagram export. Changing one must never change the other.
+Dutch-language platform export. Changing one must never change the other.
 
 ### Setting the locale in development
 
@@ -192,17 +192,13 @@ packages/
 
 ### Platform extraction flow
 
-Each platform (Instagram, Facebook, YouTube, etc.) has a `FlowBuilder` subclass in `packages/python/port/platforms/` that handles:
+Each platform has a `FlowBuilder` subclass in `packages/python/port/platforms/` that handles:
 
 1. File prompt → participant uploads DDP zip
 2. Validation → DDP category detection via `DDP_CATEGORIES`
 3. Extraction → `ZipArchiveReader` reads files from cached archive inventory
 4. Consent → participant reviews extracted tables
 5. Donation → data sent to host platform
-
-### Supported platforms
-
-LinkedIn, Instagram, Facebook, YouTube, TikTok, Netflix, ChatGPT, WhatsApp, X, Chrome
 
 ## Citation
 

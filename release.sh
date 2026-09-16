@@ -53,6 +53,9 @@ else
         # above and ADR-0004.
         [ "$platform" = "e2etest" ] && continue
         [ "$platform" = "e2etest_multifile" ] && continue
+        # example is the non-normative template that the e2etest platform
+        # delegates to (ADR-0013); it is not a study platform of this fork.
+        [ "$platform" = "example" ] && continue
         platforms+=("$platform")
     done
 
