@@ -51,7 +51,7 @@ Safari 16.4.
 | `src/archive.ts` | Opens the export zip with fflate, detects JSON or TXT and the language, inflates only the wanted members. |
 | `src/txt.ts` | Port of the desktop TXT export parser. |
 | `src/lookup.ts`, `src/timestamps.ts`, `src/redact.ts` | Nested lookup, timestamp conversion to Amsterdam time, email and own-username redaction. |
-| `src/config.ts`, `src/extract.ts` | The shared table config and the thirteen extractors, ported from `platforms/tiktok.py`. |
+| `src/config.ts`, `src/extract.ts` | The shared table config and the seven extractors, ported from `platforms/tiktok.py`. |
 | `src/review/state.ts` | Review state: deletions with undo, search, selection, pages of 25. |
 | `src/review/screens.ts`, `src/text.ts`, `src/styles.css` | Every screen as plain DOM, English and Dutch strings. |
 | `src/fonts/` | Nunito and Nunito Sans, copied from `feldspar` so the phone renders in the same faces as the desktop (`OFL.txt` is their licence). |
@@ -147,15 +147,14 @@ zone database; the two agree for every date since 1996.
 ### Extractor
 
 The same loop over the same config, the same extractor names, empty tables dropped.
-The desktop's two known bugs are reproduced so the payloads match: the ad-interests
-table is always empty, and the settings extractor raises when the content-preferences
-section is absent. The desktop sorts each dated table newest-first, but pandas keeps
+The desktop and mobile table sets are identical: seven tables driven by the shared
+config. The desktop sorts each dated table newest-first, but pandas keeps
 the original index labels and the consent screen reads rows by label, so participants
 see and donate export order on both sides; the phone does not sort. Extraction runs on
 the main thread and yields to the browser between tables, where the desktop runs in a
 worker. Extraction error counts stay internal on the phone; the desktop logs a
-count-only summary to the host. Free-text columns (`Comment`, `SearchTerm`,
-`SharedContent`) have email addresses replaced by `[email]` and the participant's own
+count-only summary to the host. The free-text column (`Comment`) has email addresses
+replaced by `[email]` and the participant's own
 username, when the export carries a profile, replaced by `[user]`; the desktop TikTok
 flow does no redaction.
 

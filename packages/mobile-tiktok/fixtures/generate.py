@@ -73,9 +73,9 @@ def json_export() -> dict:
                 {"Date": "not a date", "SearchTerm": "plain"},
             ]},
             "Share History": {"ShareHistoryList": [{"Date": DATES[2], "SharedContent": f"by {USERNAME}", "Link": "https://s/1", "Method": "copy"}]},
-            # Desktop's ad_interests_to_df always raises (2 columns passed, data
-            # had 1) for any non-empty input, so this table is unreachable and
-            # absent from every expected file until that column-count bug is fixed.
+            # The dropped sections (ad interests, settings, hashtag, searches,
+            # share history, off-TikTok) stay in the synthetic exports so the
+            # fixtures prove a dropped section is ignored.
             "Ad Interests": [{"AdInterestCategories": "Cars"}],
         },
         "Comment": {"Comments": {"CommentsList": [
