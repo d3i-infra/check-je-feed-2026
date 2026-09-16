@@ -68,7 +68,7 @@ def generate_retry_prompt(platform_name: str, multiple: bool = False) -> props.P
         text = props.Translatable(
             {
                 "en": f"Unfortunately, we cannot process your {platform_name} files. Continue, if you are sure that you selected the right files. Try again to select ALL the files.",
-                "nl": f"Helaas, kunnen we uw {platform_name} bestanden niet verwerken. Weet u zeker dat u de juiste bestanden heeft gekozen? Ga dan verder. Probeer opnieuw om ALLE bestanden te selecteren.",
+                "nl": f"Helaas kunnen we je {platform_name} bestanden niet verwerken. Weet je zeker dat je de juiste bestanden hebt gekozen? Ga dan verder. Probeer opnieuw om ALLE bestanden te selecteren.",
                 "de": f"Leider können wir Ihre {platform_name}-Dateien nicht verarbeiten. Fahren Sie fort, wenn Sie sicher sind, dass Sie die richtigen Dateien ausgewählt haben. Versuchen Sie es erneut, um ALLE Dateien auszuwählen.",
                 "it": f"Purtroppo non possiamo elaborare i suoi file di {platform_name}. Continui se è sicuro di aver selezionato i file giusti. Riprovi per selezionare TUTTI i file.",
                 "es": f"Lamentablemente, no podemos procesar sus archivos de {platform_name}. Continúe si está seguro de que ha seleccionado los archivos correctos. Intente de nuevo para seleccionar TODOS los archivos.",
@@ -78,7 +78,7 @@ def generate_retry_prompt(platform_name: str, multiple: bool = False) -> props.P
         text = props.Translatable(
             {
                 "en": f"Unfortunately, we cannot process your {platform_name} file. Continue, if you are sure that you selected the right file. Try again to select a different file.",
-                "nl": f"Helaas, kunnen we uw {platform_name} bestand niet verwerken. Weet u zeker dat u het juiste bestand heeft gekozen? Ga dan verder. Probeer opnieuw als u een ander bestand wilt kiezen.",
+                "nl": f"Helaas kunnen we je {platform_name} bestand niet verwerken. Weet je zeker dat je het juiste bestand hebt gekozen? Ga dan verder. Probeer opnieuw als je een ander bestand wilt kiezen.",
                 "de": f"Leider können wir Ihre {platform_name}-Datei nicht verarbeiten. Fahren Sie fort, wenn Sie sicher sind, dass Sie die richtige Datei ausgewählt haben. Versuchen Sie es erneut, um eine andere Datei auszuwählen.",
                 "it": f"Purtroppo non possiamo elaborare il suo file di {platform_name}. Continui se è sicuro di aver selezionato il file giusto. Riprovi per selezionare un file diverso.",
                 "es": f"Lamentablemente, no podemos procesar su archivo de {platform_name}. Continúe si está seguro de que ha seleccionado el archivo correcto. Intente de nuevo para seleccionar un archivo diferente.",
@@ -124,7 +124,7 @@ def generate_file_prompt(
     description = props.Translatable(
         {
             "en": "Please follow the download instructions and choose the file that you stored on your device.",
-            "nl": "Volg de downloadinstructies en kies het bestand dat u op uw apparaat heeft opgeslagen.",
+            "nl": "Volg de downloadinstructies en kies het bestand dat je op je apparaat hebt opgeslagen.",
             "de": "Bitte folgen Sie der Download-Anleitung und wählen Sie die Datei aus, die Sie auf Ihrem Gerät gespeichert haben.",
             "it": "Segua le istruzioni per il download e scelga il file che ha salvato sul suo dispositivo.",
             "es": "Siga las instrucciones de descarga y elija el archivo que ha guardado en su dispositivo.",
@@ -133,7 +133,7 @@ def generate_file_prompt(
     if multiple:
         description = props.Translatable({
             "en": "Please follow the download instructions and select ALL the files you received — Google Takeout usually delivers several zip files that belong together.",
-            "nl": "Volg de downloadinstructies en selecteer ALLE bestanden die u heeft ontvangen — Google Takeout levert meestal meerdere zipbestanden die bij elkaar horen.",
+            "nl": "Volg de downloadinstructies en selecteer ALLE bestanden die je hebt ontvangen — Google Takeout levert meestal meerdere zipbestanden die bij elkaar horen.",
             "de": "Bitte folgen Sie der Download-Anleitung und wählen Sie ALLE erhaltenen Dateien aus — Google Takeout liefert meist mehrere zusammengehörige ZIP-Dateien.",
             "it": "Segua le istruzioni per il download e selezioni TUTTI i file ricevuti — Google Takeout di solito fornisce più file ZIP appartenenti alla stessa esportazione.",
             "es": "Siga las instrucciones de descarga y seleccione TODOS los archivos recibidos — Google Takeout suele entregar varios archivos zip que van juntos.",
@@ -172,7 +172,7 @@ def generate_review_data_prompt(
     donate_question = props.Translatable(
         {
             "en": "Do you want to share this data for research?",
-            "nl": "Wilt u deze gegevens delen voor onderzoek?",
+            "nl": "Wil je deze gegevens delen voor onderzoek?",
             "de": "Möchten Sie diese Daten für die Forschung teilen?",
             "it": "Vuole condividere questi dati per la ricerca?",
             "es": "¿Desea compartir estos datos para la investigación?",
@@ -300,7 +300,7 @@ def generate_questionnaire() -> d3i_props.PropsUIPromptQuestionnaire:
     mc_question = props.Translatable(
         translations={
             "en": "How would you rate your overall experience?",
-            "nl": "Hoe zou u uw algemene ervaring beoordelen?",
+            "nl": "Hoe zou je je algemene ervaring beoordelen?",
             "de": "Wie würden Sie Ihre Gesamterfahrung bewerten?",
             "it": "Come valuterebbe la sua esperienza complessiva?",
             "es": "¿Cómo valoraría su experiencia general?",
@@ -324,7 +324,7 @@ def generate_questionnaire() -> d3i_props.PropsUIPromptQuestionnaire:
     checkbox_question = props.Translatable(
         translations={
             "en": "Which of our products have you purchased? (Select all that apply)",
-            "nl": "Welke van onze producten heeft u gekocht? (Selecteer alle toepasselijke)",
+            "nl": "Welke van onze producten heb je gekocht? (Selecteer alle toepasselijke)",
             "de": "Welche unserer Produkte haben Sie gekauft? (Wählen Sie alle zutreffenden aus)",
             "it": "Quali dei nostri prodotti ha acquistato? (Selezioni tutte le opzioni pertinenti)",
             "es": "¿Cuáles de nuestros productos ha comprado? (Seleccione todas las opciones que correspondan)",
@@ -389,7 +389,7 @@ def render_no_data_page(platform_name: str) -> CommandUIRender:
     body = props.PropsUIPromptConfirm(
         text=props.Translatable({
             "en": f"Unfortunately, no relevant data was found in your {platform_name} file.",
-            "nl": f"Helaas zijn er geen relevante gegevens gevonden in uw {platform_name} bestand.",
+            "nl": f"Helaas zijn er geen relevante gegevens gevonden in je {platform_name} bestand.",
             "de": f"Leider wurden in Ihrer {platform_name}-Datei keine relevanten Daten gefunden.",
             "it": f"Purtroppo non sono stati trovati dati rilevanti nel suo file di {platform_name}.",
             "es": f"Lamentablemente, no se han encontrado datos relevantes en su archivo de {platform_name}.",
@@ -425,7 +425,7 @@ def render_safety_error_page(platform_name: str, error: Exception) -> CommandUIR
     body = props.PropsUIPromptConfirm(
         text=props.Translatable({
             "en": f"Your {platform_name} file could not be processed: {error}",
-            "nl": f"Uw {platform_name} bestand kon niet worden verwerkt: {error}",
+            "nl": f"Je {platform_name} bestand kon niet worden verwerkt: {error}",
             "de": f"Ihre {platform_name}-Datei konnte nicht verarbeitet werden: {error}",
             "it": f"Non è stato possibile elaborare il suo file di {platform_name}: {error}",
             "es": f"No se ha podido procesar su archivo de {platform_name}: {error}",
@@ -457,7 +457,7 @@ def render_task_incomplete_page(platform_name: str) -> CommandUIRender:
     body = props.PropsUIPromptConfirm(
         text=props.Translatable({
             "en": "This task could not be completed. You can try again by refreshing this page. If the problem persists, please contact the researcher.",
-            "nl": "Deze taak kon niet worden voltooid. U kunt het opnieuw proberen door deze pagina te vernieuwen. Als het probleem aanhoudt, neem dan contact op met de onderzoeker.",
+            "nl": "Deze taak kon niet worden voltooid. Je kunt het opnieuw proberen door deze pagina te vernieuwen. Als het probleem aanhoudt, neem dan contact op met de onderzoeker.",
             "de": "Diese Aufgabe konnte nicht abgeschlossen werden. Sie können es erneut versuchen, indem Sie diese Seite aktualisieren. Wenn das Problem weiterhin besteht, wenden Sie sich bitte an den Forscher.",
             "it": "Non è stato possibile completare questa attività. Può riprovare aggiornando questa pagina. Se il problema persiste, contatti il ricercatore.",
             "es": "Esta tarea no se pudo completar. Puede intentarlo de nuevo actualizando esta página. Si el problema persiste, póngase en contacto con el investigador.",
@@ -493,7 +493,7 @@ def render_donate_failure_page(platform_name: str) -> CommandUIRender:
     body = props.PropsUIPromptConfirm(
         text=props.Translatable({
             "en": f"Unfortunately, your {platform_name} data could not be submitted. Please try again later.",
-            "nl": f"Helaas konden uw {platform_name} gegevens niet worden ingediend. Probeer het later opnieuw.",
+            "nl": f"Helaas konden je {platform_name} gegevens niet worden ingediend. Probeer het later opnieuw.",
             "de": f"Leider konnten Ihre {platform_name}-Daten nicht übermittelt werden. Bitte versuchen Sie es später erneut.",
             "it": f"Purtroppo non è stato possibile inviare i suoi dati di {platform_name}. Riprovi più tardi.",
             "es": f"Lamentablemente, no se han podido enviar sus datos de {platform_name}. Inténtelo de nuevo más tarde.",

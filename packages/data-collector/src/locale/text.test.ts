@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { Translator, MISSING_TRANSLATION } from '@eyra/feldspar'
 import TextBundle from '@eyra/feldspar'
 import { DEFAULT_UI_LOCALE } from './policy'
@@ -125,5 +127,33 @@ describe('resolveAll', () => {
   ])('returns an empty record for %s without throwing', (_label, junk) => {
     expect(() => resolveAll(junk, 'en')).not.toThrow()
     expect(resolveAll(junk, 'en')).toEqual({})
+  })
+})
+
+describe('consent-viz Dutch register', () => {
+  // Every participant-facing Dutch string in the consent-viz components is
+  // informal (je/jouw): the study's participants are sixteen. Mirrors
+  // packages/python/tests/test_nl_register.py.
+  const SOURCES = [
+    '../components/consent_form_viz/consent_form_viz.tsx',
+    '../components/consent_form_viz/table_selector.tsx',
+    '../components/consent_form_viz/visualization_plugin/figure.tsx'
+  ]
+  const NL_STRING = /(?:['"]nl['"]\s*,\s*|\bnl:\s*)['"]([^'"]*)['"]/g
+  const FORMAL = /\b(u|uw|alstublieft)\b/i
+
+  it('has no formal Dutch in participant-facing copy', () => {
+    const offenders: string[] = []
+    for (const relPath of SOURCES) {
+      const text = readFileSync(join(__dirname, relPath), 'utf8')
+      let match
+      while ((match = NL_STRING.exec(text)) !== null) {
+        const nl = match[1]
+        if (FORMAL.test(nl)) {
+          offenders.push(`${relPath}: ${nl.slice(0, 60)}`)
+        }
+      }
+    }
+    expect(offenders).toEqual([])
   })
 })
