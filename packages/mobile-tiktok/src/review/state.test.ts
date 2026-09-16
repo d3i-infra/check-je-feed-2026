@@ -380,3 +380,63 @@ test("a new search clears the selection", () => {
   expect(s.deleteSelected(0)).toBe(0);
   expect(s.visibleRows(0)).toEqual([0, 1, 2]);
 });
+
+// Distinct from the dated(n) helper above, which spreads rows across months
+// by index; this one takes the exact Date-cell strings a bucket test needs.
+function datedList(dates: string[]): Table {
+  return { id: "tiktok_watch_history", columns: ["Date", "Link"], rows: dates.map((d) => [d, "https://x"]) };
+}
+
+test("buckets by month over a long history and fills empty months", () => {
+  const s = new ReviewState([datedList(["2025-06-01 10:00:00", "2025-06-15 10:00:00", "2026-09-03 10:00:00"])]);
+  const b = s.buckets(0, "Date");
+  expect(b && b.unit).toBe("month");
+  expect(b && b.keys.length).toBe(16);
+  expect(b && b.keys[0]).toBe("2025-06");
+  expect(b && b.keys[15]).toBe("2026-09");
+  expect(b && b.counts[0]).toBe(2);
+  expect(b && b.counts[1]).toBe(0);
+  expect(b && b.counts[15]).toBe(1);
+});
+
+test("buckets by ISO week when the history spans under a year", () => {
+  // 2026-03-02 is a Monday; 2026-03-08 the Sunday of the same week.
+  const s = new ReviewState([datedList(["2026-03-02 00:00:00", "2026-03-08 23:59:59", "2026-03-17 12:00:00"])]);
+  const b = s.buckets(0, "Date");
+  expect(b && b.unit).toBe("week");
+  expect(b && b.keys).toEqual(["2026-03-02", "2026-03-09", "2026-03-16"]);
+  expect(b && b.counts).toEqual([2, 0, 1]);
+});
+
+test("buckets skip cells that are not dates and return null when nothing parses", () => {
+  const s = new ReviewState([datedList(["not a date", "2026-01-05 10:00:00"])]);
+  const b = s.buckets(0, "Date");
+  expect(b && b.counts).toEqual([1]);
+  expect(new ReviewState([datedList(["", "x"])]).buckets(0, "Date")).toBeNull();
+  expect(new ReviewState([{ id: "t", columns: ["A"], rows: [["1"]] }]).buckets(0, "Date")).toBeNull();
+});
+
+test("buckets follow deletions and search, and are cached in between", () => {
+  const s = new ReviewState([datedList(["2026-01-05 10:00:00", "2026-01-20 10:00:00", "2026-02-02 10:00:00"])]);
+  const first = s.buckets(0, "Date");
+  expect(s.buckets(0, "Date")).toBe(first);
+  s.deleteRow(0, 0);
+  const afterDelete = s.buckets(0, "Date");
+  expect(afterDelete).not.toBe(first);
+  // The span now starts at 2026-01-20, so the first week is that of 01-19.
+  expect(afterDelete && afterDelete.keys).toEqual(["2026-01-19", "2026-01-26", "2026-02-02"]);
+  expect(afterDelete && afterDelete.counts).toEqual([1, 0, 1]);
+  s.setQuery(0, "2026-02");
+  expect(s.buckets(0, "Date")).toEqual({ unit: "week", keys: ["2026-02-02"], counts: [1] });
+  s.undo(0);
+  s.setQuery(0, "");
+  expect(s.buckets(0, "Date")).toEqual(first);
+});
+
+test("an empty bucket result is cached until the next invalidation", () => {
+  const s = new ReviewState([datedList(["x", "y"])]);
+  expect(s.buckets(0, "Date")).toBeNull();
+  expect(s.tables[0].bucketsCache).toBeNull();
+  s.setQuery(0, "x");
+  expect(s.tables[0].bucketsCache).toBeUndefined();
+});

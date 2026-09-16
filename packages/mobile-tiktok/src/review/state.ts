@@ -4,6 +4,41 @@ import type { Table } from "../extract";
 // screen without the participant losing where they are in it.
 export const PAGE_SIZE = 25;
 
+// A bucket key comes from the "YYYY-MM-DD" prefix of a Date cell; anything
+// that does not start like a date is left out rather than guessed at.
+const DAY_PREFIX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}/;
+const MS_PER_DAY = 86400000;
+// Histories shorter than this bucket by week; the desktop's own ladder
+// switches at 300 days, so the two sides agree from a year upward.
+const WEEK_BELOW_DAYS = 365;
+
+export interface Buckets { unit: "month" | "week"; keys: string[]; counts: number[] }
+
+function digit(s: string, i: number): number { return s.charCodeAt(i) - 48; }
+
+// Days since 1970-01-01 for a cell that passed DAY_PREFIX. Reads ten char
+// codes; Date.UTC returns a number, so nothing is allocated per row.
+function dayNumber(cell: string): number {
+  const y = digit(cell, 0) * 1000 + digit(cell, 1) * 100 + digit(cell, 2) * 10 + digit(cell, 3);
+  const m = digit(cell, 5) * 10 + digit(cell, 6);
+  const d = digit(cell, 8) * 10 + digit(cell, 9);
+  return Date.UTC(y, m - 1, d) / MS_PER_DAY;
+}
+
+// Day 0 (1970-01-01) was a Thursday; the Monday on or before `dn`.
+function mondayOf(dn: number): number {
+  return dn - ((dn + 3) % 7 + 7) % 7;
+}
+
+function pad2(n: number): string { return n < 10 ? "0" + n : String(n); }
+
+function dayKey(dn: number): string {
+  const d = new Date(dn * MS_PER_DAY);
+  return d.getUTCFullYear() + "-" + pad2(d.getUTCMonth() + 1) + "-" + pad2(d.getUTCDate());
+}
+
+function monthKey(y: number, m0: number): string { return y + "-" + pad2(m0 + 1); }
+
 export interface TableState {
   table: Table;
   deleted: Uint8Array;
@@ -21,6 +56,9 @@ export interface TableState {
   // beside this table's deleted count restore a different table's rows, with
   // nothing on screen changing to say so.
   undoStack: number[][];
+  // Cached alongside visibleCache and dropped with it. undefined = not
+  // computed yet; null = computed and there was nothing to bucket.
+  bucketsCache: Buckets | null | undefined;
 }
 
 function rowMatches(row: string[], needle: string): boolean {
@@ -46,6 +84,7 @@ export class ReviewState {
       page: 0,
       visibleCache: null,
       undoStack: [],
+      bucketsCache: undefined,
     }));
   }
 
@@ -79,6 +118,7 @@ export class ReviewState {
   // Selection and paging deliberately do not: they change nothing here.
   private invalidate(t: TableState): void {
     t.visibleCache = null;
+    t.bucketsCache = undefined;
   }
 
   setQuery(tableIndex: number, query: string): void {
@@ -223,5 +263,57 @@ export class ReviewState {
   keptCount(tableIndex: number): number {
     const t = this.tables[tableIndex];
     return t.table.rows.length - t.deletedCount;
+  }
+
+  // Counts of visible rows per month, or per week when the history is short.
+  // One pass over the visible rows with no per-row allocation (ADR-0035);
+  // cached beside visibleCache and dropped with it, so deletions and search
+  // change the chart the way they change the table. The returned object is
+  // the cached one: read it, do not mutate it.
+  buckets(tableIndex: number, column: string): Buckets | null {
+    const ts = this.tables[tableIndex];
+    if (ts.bucketsCache !== undefined) return ts.bucketsCache;
+    const col = ts.table.columns.indexOf(column);
+    if (col < 0) { ts.bucketsCache = null; return null; }
+    const rows = ts.table.rows;
+    const visible = this.visible(tableIndex);
+    // Pass 1: per-day counts keyed by day number, plus the span.
+    const perDay: { [dn: number]: number } = {};
+    let minDn = Infinity, maxDn = -Infinity, any = false;
+    for (let k = 0; k < visible.length; k++) {
+      const cell = rows[visible[k]][col];
+      if (cell === undefined || !DAY_PREFIX.test(cell)) continue;
+      const dn = dayNumber(cell);
+      if (dn !== dn) continue; // NaN from an impossible date
+      perDay[dn] = (perDay[dn] || 0) + 1;
+      if (dn < minDn) minDn = dn;
+      if (dn > maxDn) maxDn = dn;
+      any = true;
+    }
+    if (!any) { ts.bucketsCache = null; return null; }
+    const keys: string[] = [];
+    const counts: number[] = [];
+    let unit: "month" | "week";
+    if (maxDn - minDn < WEEK_BELOW_DAYS) {
+      unit = "week";
+      const start = mondayOf(minDn), end = mondayOf(maxDn);
+      for (let w = start; w <= end; w += 7) { keys.push(dayKey(w)); counts.push(0); }
+      for (const dnStr in perDay) {
+        const dn = +dnStr;
+        counts[(mondayOf(dn) - start) / 7] += perDay[dn];
+      }
+    } else {
+      unit = "month";
+      const first = new Date(minDn * MS_PER_DAY), last = new Date(maxDn * MS_PER_DAY);
+      const y0 = first.getUTCFullYear(), m0 = first.getUTCMonth();
+      const months = (last.getUTCFullYear() - y0) * 12 + (last.getUTCMonth() - m0) + 1;
+      for (let i = 0; i < months; i++) { keys.push(monthKey(y0 + Math.floor((m0 + i) / 12), (m0 + i) % 12)); counts.push(0); }
+      for (const dnStr in perDay) {
+        const d = new Date(+dnStr * MS_PER_DAY);
+        counts[(d.getUTCFullYear() - y0) * 12 + (d.getUTCMonth() - m0)] += perDay[dnStr];
+      }
+    }
+    ts.bucketsCache = { unit: unit, keys: keys, counts: counts };
+    return ts.bucketsCache;
   }
 }
