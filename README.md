@@ -188,6 +188,7 @@ packages/
   python/         Python extraction scripts (per-platform)
   feldspar/       Workflow UI framework (upstream Eyra)
   data-collector/ Host app / dev server with custom UI components
+  mobile-tiktok/  Standalone mobile TikTok task, built by Vite for Safari 12, see packages/mobile-tiktok/README.md
 ```
 
 ### Platform extraction flow

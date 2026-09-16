@@ -27,9 +27,12 @@ change establishes a reusable pattern, record it with `adg lean new`.
 
 ## Project basics
 
+This is check-je-feed, a TikTok-only fork of algosoc-2026: a desktop donation flow plus
+a standalone mobile package for phones that can't run the desktop bundle.
+
 pnpm monorepo (the Feldspar data-donation workflow). TypeScript/React packages under
-`packages/` (`@eyra/feldspar`, `@eyra/data-collector`, built with Vite); Python Pyodide
-runtime in `packages/python` (Poetry).
+`packages/` (`@eyra/feldspar`, `@eyra/data-collector`, `packages/mobile-tiktok`, built
+with Vite); Python Pyodide runtime in `packages/python` (Poetry).
 
 - Build: `pnpm build`
 - All tests (JS + Python): `pnpm test`
