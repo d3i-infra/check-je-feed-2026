@@ -477,7 +477,21 @@ def watch_history_to_df(reader: ZipArchiveReader, errors: Counter, validation) -
           "headers": {
             "Date": {"en": "Date", "nl": "Datum en tijd"},
             "Link": {"en": "Link", "nl": "URL"}
-          }
+          },
+          "visualizations": [
+            {
+              "title": {"en": "Videos watched over time", "nl": "Bekeken video's in de loop van de tijd"},
+              "type": "area",
+              "group": {
+                "column": "Date",
+                "dateFormat": "auto",
+                "label": {"en": "Date", "nl": "Datum"}
+              },
+              "values": [
+                {"aggregate": "count", "label": {"en": "Number of videos", "nl": "Aantal video's"}}
+              ]
+            }
+          ]
         }
     """
     out = pd.DataFrame()

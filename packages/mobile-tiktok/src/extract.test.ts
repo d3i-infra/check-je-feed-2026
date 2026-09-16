@@ -98,3 +98,11 @@ test("runExtractionAsync yields once between tables and matches the sync result"
   expect(got.tables).toEqual(want.tables);
   expect(got.errors).toEqual(want.errors);
 });
+
+test("the watch-history config carries one over-time chart", () => {
+  const wh = TABLES.filter((c) => c.id === "tiktok_watch_history")[0];
+  const viz = wh.visualizations || [];
+  expect(viz.length).toBe(1);
+  expect(viz[0].type).toBe("area");
+  expect(viz[0].group && viz[0].group.column).toBe("Date");
+});

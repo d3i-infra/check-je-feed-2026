@@ -49,3 +49,15 @@ def test_comments_table_carries_the_post_link():
     cfg = json.loads((CONFIGS / "tiktok_config.json").read_text())
     comments = [t for t in cfg["tables"] if t["id"] == "tiktok_comments"][0]
     assert "Url" in comments["headers"]
+
+
+def test_watch_history_carries_the_over_time_visualization():
+    cfg = json.loads((CONFIGS / "tiktok_config.json").read_text())
+    wh = [t for t in cfg["tables"] if t["id"] == "tiktok_watch_history"][0]
+    viz = wh["visualizations"]
+    assert len(viz) == 1
+    assert viz[0]["type"] == "area"
+    assert viz[0]["group"]["column"] == "Date"
+    assert viz[0]["group"]["dateFormat"] == "auto"
+    for node in (viz[0]["title"], viz[0]["group"]["label"], viz[0]["values"][0]["label"]):
+        assert set(node) >= {"en", "nl"} and node["en"] and node["nl"]
