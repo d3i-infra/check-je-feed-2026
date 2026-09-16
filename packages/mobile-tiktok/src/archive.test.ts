@@ -1,5 +1,5 @@
 import { zipSync, strToU8 } from "fflate";
-import { openExport, loadExport, ArchiveError, MAX_FILE_BYTES, TXT_FILES } from "./archive";
+import { openExport, loadExport, ArchiveError, MAX_FILE_BYTES, TXT_FILES, NL_MARKERS, EN_MARKERS } from "./archive";
 
 function zip(entries: { [path: string]: string }): Uint8Array {
   const input: { [path: string]: Uint8Array } = {};
@@ -108,4 +108,20 @@ test("TXT_FILES lists both languages for all 7 tables plus the profile", () => {
   expect(TXT_FILES.nl.length).toBe(TXT_FILES.en.length);
   expect(TXT_FILES.en).toContain("Watch History.txt");
   expect(TXT_FILES.nl).toContain("Kijkgeschiedenis.txt");
+});
+
+test("a TXT export holding only dropped sections is not recognized", () => {
+  const bytes = zip({ "TikTok/Your Activity/Searches.txt": "You have no data in this section\n", "TikTok/Profile and Settings/Settings.txt": "Private Account: Off\n" });
+  expect(() => openExport(bytes)).toThrow(/not_tiktok/);
+});
+
+test("a comments-only English export is recognized as en", () => {
+  const exp = openExport(zip({ "TikTok/Comments/Comments.txt": "Date: 2024-01-01 00:00:00\nComment: hi\n" }));
+  expect(exp.kind).toBe("txt");
+  if (exp.kind === "txt") { expect(exp.language).toBe("en"); expect(Object.keys(exp.files)).toEqual(["Comments.txt"]); }
+});
+
+test("language markers are exactly the wanted files", () => {
+  expect(NL_MARKERS).toEqual(TXT_FILES.nl);
+  expect(EN_MARKERS).toEqual(TXT_FILES.en);
 });

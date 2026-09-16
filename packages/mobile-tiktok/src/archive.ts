@@ -35,10 +35,11 @@ export const TXT_FILES: { nl: string[]; en: string[] } = {
   ],
 };
 
-// Filenames that identify a language even when the wanted ones are absent.
-// Taken from DDP_CATEGORIES known_files in tiktok.py; a handful is enough.
-const NL_MARKERS = ["Kijkgeschiedenis.txt", "Zoekopdrachten.txt", "Instellingen.txt", "Profielinformatie.txt", "Reacties.txt", "Likelijst.txt", "Volger.txt", "Volgend.txt", "Samenvatting van activiteit.txt"];
-const EN_MARKERS = ["Watch History.txt", "Searches.txt", "Settings.txt", "Profile Information.txt", "Comments.txt", "Like List.txt", "Follower.txt", "Following.txt", "Activity Summary.txt"];
+// Language is detected only from files the app reads: a TXT export that holds
+// none of them is not a usable export and is rejected as not_tiktok, the same
+// outcome the desktop validator gives it (ADR-0041 parity).
+export const NL_MARKERS: string[] = TXT_FILES.nl;
+export const EN_MARKERS: string[] = TXT_FILES.en;
 
 function basename(path: string): string {
   const i = path.lastIndexOf("/");

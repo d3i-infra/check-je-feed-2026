@@ -5,6 +5,7 @@ This module contains an example flow of a TikTok data donation study.
 
 Assumptions:
 It handles DDPs in the English or Dutch language, either with filetype JSON or a compressed folder with TXT files.
+Archive recognition keys off the files the extractors read: any export holding at least one of them is accepted.
 
 Timestamps
 ----------
@@ -81,32 +82,8 @@ DDP_CATEGORIES = [
         ddp_filetype=DDPFiletype.TXT,
         language=Language.NL,
         known_files=[
-            "Locatierecensies.txt","Instellingen voor LIVE bekijken.txt",
-            "Geschiedenis van LIVE gaan.txt","Reactie op livestream.txt",
-            "Geschiedenis van LIVE bekijken.txt","Instellingen voor LIVE gaan.txt",
-            "Geschiedenis van Muntaankopen.txt","Transactiegeschiedenis.txt",
-            "Reacties.txt","Informatie over huidige betaling.txt",
-            "Geschiedenis van klantenservice.txt","Bestelgeschiedenis.txt",
-            "Favoriet item.txt","Communicatie met winkels.txt","Productrecensies.txt",
-            "Vouchers.txt","Geschiedenis van bladeren door producten.txt",
-            "Geschiedenis van bestelkwesties.txt",
-            "Geschiedenis van retourzendingen en terugbetalingen.txt",
-            "Opgeslagen adresgegevens.txt","Winkelwagenlijst.txt",
-            "Favoriete films en tv-programma's.txt","Favoriete video's.txt",
-            "Favoriete hashtags.txt","Favoriete afspeellijsten.txt",
-            "Favoriete effecten.txt","Likelijst.txt","Favoriete geluiden.txt",
-            "Favoriete collecties.txt","Favoriete plaatsen.txt",
-            "Favoriete reacties.txt","Volger.txt","Informatie van derden.txt",
-            "Volgend.txt","Blokkeringslijst.txt","AI-moji.txt","Instellingen.txt",
-            "Profielweergaven.txt","Automatisch invullen.txt","Profielinformatie.txt",
-            "Inloggeschiedenis.txt","Activiteit buiten TikTok.txt",
-            "Herplaatsingen.txt","Donatie.txt","Samenvatting van activiteit.txt",
-            "Fondsenwerving.txt","Geschiedenis van advertentielinks.txt","Hashtag.txt",
-            "Stickers.txt","Meest recente locatiegegevens.txt","Aankopen.txt",
-            "Advertentie-interesses.txt","Reacties op direct formulier-advertenties.txt",
-            "Geschiedenis delen.txt","Status.txt","Kijkgeschiedenis.txt",
-            "Zoekopdrachten.txt","Groepschat.txt","Berichten.txt",
-            "Onlangs verwijderde berichten.txt","Directe berichten.txt",
+            "Samenvatting van activiteit.txt", "Kijkgeschiedenis.txt", "Favoriete video's.txt",
+            "Volger.txt", "Volgend.txt", "Likelijst.txt", "Reacties.txt", "Profielinformatie.txt",
         ],
     ),
     DDPCategory(
@@ -114,17 +91,10 @@ DDP_CATEGORIES = [
         ddp_filetype=DDPFiletype.TXT,
         language=Language.EN,
         known_files=[
-            "Comments.txt","Recently Deleted Posts.txt","Posts.txt","Favorite Videos.txt",
-            "Like List.txt","Favorite Sounds.txt","Favorite HashTags.txt",
-            "Favorite Places.txt","Favorite Effects.txt","Favorite Comments.txt",
-            "Favorite Collections.txt","Searches.txt","Ad Interests.txt",
-            "Most Recent Location Data.txt","Activity Summary.txt","Watch History.txt",
-            "Off TikTok Activity.txt","Donation.txt","Share History.txt","Hashtag.txt",
-            "Stickers.txt","Purchases.txt","Login History.txt","Reposts.txt","Status.txt",
-            "Instant Form Ads Responses.txt","Fundraiser.txt","Settings.txt","Follower.txt",
-            "Following.txt",
+            "Activity Summary.txt", "Watch History.txt", "Favorite Videos.txt", "Follower.txt",
+            "Following.txt", "Like List.txt", "Comments.txt", "Profile Information.txt",
         ],
-    )   
+    )
 ]
 
 
