@@ -2,7 +2,7 @@
 least one section the extractors read, and rejects one that holds none.
 
 The known-file lists mirror packages/mobile-tiktok/src/archive.ts TXT_FILES
-(ADR-0041 parity); the two sets below are the single source for both sides."""
+(ADR-0041 parity); the two sets below must be kept in sync with that file by hand."""
 import io
 import zipfile
 

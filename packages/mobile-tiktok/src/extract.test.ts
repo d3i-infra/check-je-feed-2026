@@ -62,6 +62,12 @@ test("comments redact emails and the username", () => {
   expect(comments.rows).toEqual([["2024-01-01 01:00:00", "hi [user], mail [email]", "", "https://x"]]);
 });
 
+test("Dutch TXT comments carry the post link", () => {
+  const exp = txtExport("nl", { "Reacties.txt": "Datum: 2026-05-02 10:09:50 UTC\nReactie: hoi\nSticker: N.v.t.\nLink naar origineel bericht: https://www.tiktok.com/@x/video/1\n" });
+  const rows = extractTable("tiktok_comments", exp, counter()).rows;
+  expect(rows).toEqual([["2026-05-02 12:09:50", "hoi", "", "https://www.tiktok.com/@x/video/1"]]);
+});
+
 test("runExtraction drops empty tables and keeps config order", () => {
   const exp = jsonExport({
     "Likes and Favorites": { "Like List": { ItemFavoriteList: [{ Date: "2024-01-01 00:00:00", Link: "l" }] } },
