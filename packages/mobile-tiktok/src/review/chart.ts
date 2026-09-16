@@ -8,11 +8,14 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const W = 320, H = 160;
 const LEFT = 40, RIGHT = 8, TOP = 8, BOTTOM = 28;
 const PLOT_W = W - LEFT - RIGHT, PLOT_H = H - TOP - BOTTOM;
-const MAX_X_LABELS = 6;
 // Above this many buckets a bar chart is unreadable and the DOM cost is not
 // worth it (a multi-year daily-shaped history could otherwise ask for
 // thousands of <rect> elements); draw only the axes and the span instead.
 const MAX_BARS = 400;
+// A rough per-character width for the x-label font, and the minimum gap kept
+// between two neighbouring labels' boxes, both in viewBox units.
+const CHAR_UNITS = 5.4;
+const LABEL_GAP = 6;
 
 function node(tag: string, attrs: { [k: string]: string }): SVGElement {
   const e = document.createElementNS(SVG_NS, tag);
@@ -35,10 +38,7 @@ function niceStep(max: number): number {
   return Math.max(1, f * pow);
 }
 
-// `title` is no longer read here: the SVG is aria-hidden (the h3 above it
-// names the figure), but the parameter stays so call sites read the same as
-// buildChart(buckets, title, yLabel) everywhere else.
-export function buildChart(b: Buckets, _title: string, yLabel: string): SVGElement {
+export function buildChart(b: Buckets): SVGElement {
   // aria-hidden: the h3 above the figure already names it and the table
   // beside it carries the data, so the SVG itself is decorative to a screen
   // reader rather than a second, redundant announcement.
@@ -55,7 +55,12 @@ export function buildChart(b: Buckets, _title: string, yLabel: string): SVGEleme
   if (n > MAX_BARS) {
     svg.appendChild(node("line", { x1: String(LEFT), x2: String(W - RIGHT), y1: String(TOP + PLOT_H), y2: String(TOP + PLOT_H), "class": "mt-grid" }));
     svg.appendChild(node("line", { x1: String(LEFT), x2: String(LEFT), y1: String(TOP), y2: String(TOP + PLOT_H), "class": "mt-grid" }));
-    svg.appendChild(textNode(W / 2, H - BOTTOM + 14, "mt-xlabel", b.keys[0] + " … " + b.keys[n - 1], "middle"));
+    const rangeLabel = b.keys[0] + " … " + b.keys[n - 1];
+    const rangeHalf = (rangeLabel.length * CHAR_UNITS) / 2;
+    let rangeX = W / 2;
+    if (rangeX < rangeHalf) rangeX = rangeHalf;
+    if (rangeX > W - rangeHalf) rangeX = W - rangeHalf;
+    svg.appendChild(textNode(rangeX, H - BOTTOM + 14, "mt-xlabel", rangeLabel, "middle"));
     return svg;
   }
 
@@ -71,7 +76,6 @@ export function buildChart(b: Buckets, _title: string, yLabel: string): SVGEleme
     svg.appendChild(node("line", { x1: String(LEFT), x2: String(W - RIGHT), y1: String(y), y2: String(y), "class": "mt-grid" }));
     svg.appendChild(textNode(LEFT - 4, y + 3, "mt-ylabel", String(v), "end"));
   }
-  svg.appendChild(textNode(LEFT, TOP - 1, "mt-ytitle", yLabel, "start"));
 
   // Bars.
   const slot = PLOT_W / n;
@@ -84,14 +88,27 @@ export function buildChart(b: Buckets, _title: string, yLabel: string): SVGEleme
     }));
   }
 
-  // X labels: first, last, evenly spaced in between, at most MAX_X_LABELS.
-  const every = Math.max(1, Math.ceil((n - 1) / (MAX_X_LABELS - 1)));
+  // Labels are centred under their bar and spaced by their own width, so
+  // neighbours never touch; the first and the last are always drawn, and a
+  // candidate that would sit within a label of the last one is skipped. The
+  // x is clamped so a centred label at either end stays inside the viewBox;
+  // the skip check compares clamped positions on both sides, since the last
+  // label's own drawn x can already be pulled in from its unclamped centre.
+  const labelW = b.keys[0].length * CHAR_UNITS;
+  const every = Math.max(1, Math.ceil((labelW + LABEL_GAP) / slot));
+  const half = labelW / 2;
+  const lastX = LEFT + (n - 1) * slot + slot / 2;
+  const lastDrawnX = Math.min(lastX, W - half);
   for (let i = 0; i < n; i++) {
-    const isEdge = i === 0 || i === n - 1;
-    if (!isEdge && (i % every !== 0 || n - 1 - i < every)) continue;
-    const x = LEFT + i * slot + slot / 2;
-    const anchor = i === 0 ? "start" : i === n - 1 ? "end" : "middle";
-    svg.appendChild(textNode(x, H - BOTTOM + 14, "mt-xlabel", b.keys[i], anchor));
+    const isLast = i === n - 1;
+    let x0 = LEFT + i * slot + slot / 2;
+    if (x0 < half) x0 = half;
+    if (x0 > W - half) x0 = W - half;
+    if (!isLast) {
+      if (i % every !== 0) continue;
+      if (lastDrawnX - x0 < labelW + LABEL_GAP) continue;
+    }
+    svg.appendChild(textNode(x0, H - BOTTOM + 14, "mt-xlabel", b.keys[i], "middle"));
   }
   return svg;
 }

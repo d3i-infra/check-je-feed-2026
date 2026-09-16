@@ -712,6 +712,18 @@ function figure(root: HTMLElement): HTMLElement | null {
   return root.querySelector("[data-role=figure]") as HTMLElement | null;
 }
 
+test("the figure caption names the count label and the bucket unit", () => {
+  const nl = setup("nl");
+  nl.s.tables(new ReviewState([watchHistory(90)]));            // 60-day span: weeks
+  expect((figure(nl.root) as HTMLElement).querySelector("[data-role=figure-caption]")!.textContent).toBe("Aantal video's per week");
+  const en = setup("en");
+  const rows: string[][] = [];
+  for (let m = 1; m <= 14; m++) rows.push(["2025-" + (m < 10 ? "0" + m : String(m > 12 ? m - 12 : m)) + "-01 09:00:00", "https://x"]);
+  rows[12][0] = "2026-01-01 09:00:00"; rows[13][0] = "2026-02-01 09:00:00";
+  en.s.tables(new ReviewState([{ id: "tiktok_watch_history", columns: ["Date", "Link"], rows }]));  // 13-month span: months
+  expect((figure(en.root) as HTMLElement).querySelector("[data-role=figure-caption]")!.textContent).toBe("Number of videos per month");
+});
+
 test("the watch-history table shows the over-time figure above the search box", () => {
   const { root, s } = setup("nl");
   s.tables(new ReviewState([watchHistory(90)]));

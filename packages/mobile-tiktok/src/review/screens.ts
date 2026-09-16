@@ -444,7 +444,10 @@ export class Screens {
     box.setAttribute("data-role", "figure");
     const yLabel = label(v.values && v.values[0] ? v.values[0].label : undefined, "", this.locale);
     box.appendChild(el("h3", "font-body text-base font-bold mb-1", title));
-    box.appendChild(buildChart(b, title, yLabel));
+    box.appendChild(buildChart(b));
+    const caption = el("p", "font-body text-sm text-grey2 mb-2", this.tx(b.unit === "week" ? "figure_caption_week" : "figure_caption_month", { label: yLabel }));
+    caption.setAttribute("data-role", "figure-caption");
+    box.appendChild(caption);
     this.drawnBuckets = b;
     this.drawnTitle = title;
   }

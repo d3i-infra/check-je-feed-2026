@@ -62,6 +62,10 @@ export const T: { [key: string]: { en: string; nl: string } } = {
   skip: { en: "Skip", nl: "Overslaan" },
   incomplete_title: { en: "Task not completed", nl: "Taak niet voltooid" },
   incomplete_body: { en: "The task was not completed. You can close this page, or open the link again to try once more.", nl: "De taak is niet voltooid. U kunt deze pagina sluiten, of de link opnieuw openen om het nog eens te proberen." },
+  // The watch-history figure's caption, under the chart: names the count
+  // label the y axis dropped and the bucket unit (Task 6).
+  figure_caption_month: { en: "{label} per month", nl: "{label} per maand" },
+  figure_caption_week: { en: "{label} per week", nl: "{label} per week" },
 };
 
 // Every count shown to the participant is grouped by locale (200000 ->
