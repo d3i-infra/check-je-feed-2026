@@ -47,8 +47,8 @@ test("activity summary uses Dutch labels and priority keys", () => {
     videosWatchedToTheEndSinceAccountRegistration: 12, videosCommentedOnSinceAccountRegistration: "3",
   } } } });
   expect(extractTable("tiktok_activity_summary", exp, counter()).rows).toEqual([
-    ["Video's die u volledig heeft bekeken sinds uw registratie", "12"],
-    ["Video's waarop u heeft gereageerd sinds uw registratie", "3"],
+    ["Video's die je helemaal hebt bekeken sinds je registratie", "12"],
+    ["Video's waarop je hebt gereageerd sinds je registratie", "3"],
   ]);
 });
 

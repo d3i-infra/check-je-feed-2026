@@ -414,9 +414,9 @@ def activity_summary_to_df(reader: ZipArchiveReader, errors: Counter, validation
         if not isinstance(summary, dict):
             return out
         metric_priority = [
-            ("Video's die u volledig heeft bekeken sinds uw registratie", ["videosWatchedToTheEndSinceAccountRegistration", "Videos watched to the end since account registration", "Video's tot het einde bekeken sinds accountregistratie"]),
-            ("Video's waarop u heeft gereageerd sinds uw registratie", ["videosCommentedOnSinceAccountRegistration", "commentVideoCount", "Videos commented on since account registration", "Video's waarop is gereageerd sinds accountregistratie"]),
-            ("Video's die u heeft gedeeld sinds uw registratie", ["videosSharedSinceAccountRegistration", "sharedVideoCount", "Videos shared since account registration", "Video's gedeeld sinds accountregistratie"]),
+            ("Video's die je helemaal hebt bekeken sinds je registratie", ["videosWatchedToTheEndSinceAccountRegistration", "Videos watched to the end since account registration", "Video's tot het einde bekeken sinds accountregistratie"]),
+            ("Video's waarop je hebt gereageerd sinds je registratie", ["videosCommentedOnSinceAccountRegistration", "commentVideoCount", "Videos commented on since account registration", "Video's waarop is gereageerd sinds accountregistratie"]),
+            ("Video's die je hebt gedeeld sinds je registratie", ["videosSharedSinceAccountRegistration", "sharedVideoCount", "Videos shared since account registration", "Video's gedeeld sinds accountregistratie"]),
         ]
         rows = []
         for label, keys in metric_priority:
