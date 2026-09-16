@@ -1,15 +1,11 @@
-# AlgoSoc-2026
+# check-je-feed
 
-This study will be executed in the LISS Panel
-Platforms of interest will be:
+TikTok data donation task, desktop and mobile. Forked from
+[algosoc-2026](https://github.com/d3i-infra/algosoc-2026) on 2026-09-16 and reduced
+to the TikTok platform only.
 
-- TikTok
-- YouTube
-- Instagram
-- Facebook
-- Google
-
-Preview all platforms: [https://d3i-infra.github.io/algosoc-2026/](https://d3i-infra.github.io/algosoc-2026/)
+Tables collected: activity summary, watch history, favorite videos, followers,
+following, liked videos, comments (with the commented-post link).
 
 # The data donation task
 
