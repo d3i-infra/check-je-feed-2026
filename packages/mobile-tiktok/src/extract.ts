@@ -9,7 +9,7 @@ export interface Table { id: string; columns: string[]; rows: string[][] }
 export interface Extraction { tables: Table[]; errors: { [key: string]: number } }
 export interface Counter { errors: { [key: string]: number }; add(key: string): void }
 
-const REDACTED_COLUMNS = ["Comment", "SearchTerm", "SharedContent"];
+const REDACTED_COLUMNS = ["Comment"];
 
 type Items = unknown[];
 type Source =
@@ -89,37 +89,6 @@ const extractors: { [name: string]: Extractor } = {
     }) };
   },
 
-  settings_to_df(src, errors) {
-    const columns = ["Setting", "Keywords"];
-    let map: unknown;
-    if (src.kind === "json") map = get(src.data, ["App Settings", "Profile And Settings"], "Settings", "SettingsMap");
-    else map = txtMap(src, "Instellingen.txt", "Settings.txt");
-    if (!isRecord(map) || Object.keys(map).length === 0) return { columns, rows: [] };
-    const m = map;
-    return { columns, rows: rowsOf(errors, () => {
-      let prefs: unknown = undefined;
-      for (const label of ["Content Preferences", "Contentvoorkeuren"]) {
-        if (Object.prototype.hasOwnProperty.call(m, label)) { prefs = m[label]; if (isRecord(prefs)) break; }
-      }
-      // Python: content_preferences unbound -> UnboundLocalError; not a dict -> return out (no error)
-      if (prefs === undefined) throw new ReferenceError("UnboundLocalError");
-      if (!isRecord(prefs)) return [];
-      const fieldMap: [string, string][] = [
-        ["Keyword filters for videos in Following feed", "Zoekwoordfilter voor video's in uw Volgend-feed"],
-        ["Keyword filters for videos in For You feed", "Zoekwoordfilters voor video's in uw Voor Jou-feed"],
-        ["Trefwoordfilters voor video's in de 'Volgend'-feed", "Zoekwoordfilter voor video's in uw Volgend-feed"],
-        ["Trefwoordfilters voor video's in de 'Voor jou'-feed", "Zoekwoordfilters voor video's in uw Voor Jou-feed"],
-      ];
-      const rows: unknown[][] = [];
-      for (const [key, label] of fieldMap) {
-        if (!Object.prototype.hasOwnProperty.call(prefs, key)) continue;
-        const v = prefs[key];
-        rows.push([label, joinKeywords(v)]);
-      }
-      return rows;
-    }) };
-  },
-
   watch_history_to_df(src, errors) {
     return dateLink(src, errors, () => get(src.kind === "json" ? src.data : null, ACTIVITY, ["Video Browsing History", "Watch History"], "VideoList"), "Kijkgeschiedenis.txt", "Watch History.txt");
   },
@@ -136,29 +105,8 @@ const extractors: { [name: string]: Extractor } = {
     return dateUser(src, errors, () => getFirst(src.kind === "json" ? src.data : null, [ACTIVITY, ["Following List", "Following"], "Following"], ["Profile And Settings", "Following", "Following"]), "Volgend.txt", "Following.txt", ["UserName", "User Name", "Gebruikersnaam", "Username"]);
   },
 
-  hashtag_to_df(src, errors) {
-    const columns = ["HashtagName", "HashtagLink"];
-    const items = src.kind === "json" ? listItems(get(src.data, ACTIVITY, "Hashtag", "HashtagList")) : txtItems(src, "Hashtag.txt", "Hashtag.txt");
-    if (!items) return { columns, rows: [] };
-    return { columns, rows: rowsOf(errors, () => items.map((item) => [itemGet(item, "HashtagName", "Hashtag Name", "Hashtag naam"), itemGet(item, "HashtagLink", "Hashtag Link")])) };
-  },
-
   like_list_to_df(src, errors) {
     return dateLink(src, errors, () => getFirst(src.kind === "json" ? src.data : null, [ACTIVITY, "Like List", "ItemFavoriteList"], ["Likes and Favorites", "Like List", "ItemFavoriteList"]), "Likelijst.txt", "Like List.txt");
-  },
-
-  searches_to_df(src, errors) {
-    const columns = ["Date", "SearchTerm"];
-    const items = src.kind === "json" ? listItems(get(src.data, ACTIVITY, ["Search History", "Searches"], "SearchList")) : txtItems(src, "Zoekopdrachten.txt", "Searches.txt");
-    if (!items) return { columns, rows: [] };
-    return { columns, rows: rowsOf(errors, () => items.map((item) => [itemDate(item, errors), itemGet(item, "SearchTerm", "Search Term", "Zoekterm")])) };
-  },
-
-  share_history_to_df(src, errors) {
-    const columns = ["Date", "SharedContent", "Link", "Method"];
-    const items = src.kind === "json" ? listItems(get(src.data, ACTIVITY, "Share History", "ShareHistoryList")) : txtItems(src, "Geschiedenis delen.txt", "Share History.txt");
-    if (!items) return { columns, rows: [] };
-    return { columns, rows: rowsOf(errors, () => items.map((item) => [itemDate(item, errors), itemGet(item, "SharedContent", "Shared Content", "Gedeelde inhoud"), itemGet(item, "Link"), itemGet(item, "Method", "Methode")])) };
   },
 
   comments_to_df(src, errors) {
@@ -167,34 +115,7 @@ const extractors: { [name: string]: Extractor } = {
     if (!items) return { columns, rows: [] };
     return { columns, rows: rowsOf(errors, () => items.map((item) => [itemDate(item, errors), itemGet(item, "Comment", "Reactie"), itemGet(item, "Photo", "Foto"), itemGet(item, "Url", "Link", "originalPostUrl", "Original Post Link", "Originele link naar bericht")])) };
   },
-
-  off_tiktok_to_df(src, errors) {
-    const columns = ["Date", "Source", "Event"];
-    const items = src.kind === "json" ? listItems(get(src.data, "Profile And Settings", "Off TikTok Activity", "OffTikTokActivityDataList")) : txtItems(src, "Activiteit buiten TikTok.txt", "Off-TikTok Activities.txt");
-    if (!items) return { columns, rows: [] };
-    return { columns, rows: rowsOf(errors, () => items.map((item) => [itemDate(item, errors, "Date", "Datum", "TimeStamp"), itemGet(item, "Source", "Bron"), itemGet(item, "Event", "Evenement")])) };
-  },
-
-  // Desktop builds a 1-column row list against a 2-column frame, which raises
-  // ValueError for any non-empty input. The table is therefore always empty
-  // there; reproduce that until the desktop extractor is fixed (spec 10).
-  ad_interests_to_df(src, errors) {
-    const columns = ["Date", "Interest"];
-    const items = src.kind === "json" ? listItems(get(src.data, "Your Activity", "Ad Interests")) : txtItems(src, "Advertentie-interesses.txt", "Ad Interests.txt");
-    if (!items) return { columns, rows: [] };
-    return { columns, rows: rowsOf(errors, () => {
-      if (items.length === 0) return [];
-      throw new RangeError("ValueError");
-    }) };
-  },
 };
-
-function joinKeywords(v: unknown): string {
-  // Python: ", ".join(value) — a list joins; a string joins its characters; else TypeError.
-  if (Array.isArray(v)) return v.map((x) => String(x)).join(", ");
-  if (typeof v === "string") return v.split("").join(", ");
-  throw new TypeError("TypeError");
-}
 
 function dateLink(src: Source, errors: Counter, json: () => unknown, nl: string, en: string) {
   const columns = ["Date", "Link"];

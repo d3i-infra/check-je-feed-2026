@@ -33,6 +33,9 @@ function watchHistory(n: number): Table {
 
 const searches: Table = { id: "tiktok_searches", columns: ["Date", "SearchTerm"], rows: [["2024-01-01", "q"]] };
 const shares: Table = { id: "tiktok_share_history", columns: ["Date", "SharedContent", "Link", "Method"], rows: [["2024-01-01 09:00:00", "video", "https://x/1", "Copy"]] };
+// A kept table (still in the config) with a 4-column shape, for tests that
+// assert on config-derived titles/headers rather than fallback-to-raw-id text.
+const comments: Table = { id: "tiktok_comments", columns: ["Date", "Comment", "Photo", "Url"], rows: [["2024-01-01 09:00:00", "hi", "", "https://x/1"]] };
 
 function rowsIn(root: HTMLElement): HTMLElement[] {
   return Array.prototype.slice.call(root.querySelectorAll(".mt-row")) as HTMLElement[];
@@ -65,12 +68,12 @@ test("intro shows the file input and reports a chosen file", () => {
 
 test("a select lists every table with its kept count and switches table on change", () => {
   const { root, h, s } = setup();
-  const state = new ReviewState([watchHistory(2), searches]);
+  const state = new ReviewState([watchHistory(2), comments]);
   s.tables(state);
   const sel = root.querySelector("select[data-role=table-select]") as HTMLSelectElement;
   expect(sel.options.length).toBe(2);
   expect(sel.options[0].textContent).toBe("Watch history (2 rows)");
-  expect(sel.options[1].textContent).toBe("Searches (1 row)");
+  expect(sel.options[1].textContent).toBe("Your comments (1 row)");
   expect(sel.value).toBe("0");
   expect(root.querySelector("[data-tab]")).toBeNull();
   sel.value = "1";
@@ -444,13 +447,13 @@ test("the step buttons walk the tables and are disabled at the ends", () => {
 
 test("the header cells carry the config's translated column names", () => {
   const en = setup("en");
-  en.s.tables(new ReviewState([shares]));
+  en.s.tables(new ReviewState([comments]));
   const heads = (root: HTMLElement) => (Array.prototype.slice.call(root.querySelectorAll("thead th div")) as HTMLElement[]).map((d) => d.textContent);
-  expect(heads(en.root)).toEqual(["Date", "Shared content", "Link", "Method"]);
+  expect(heads(en.root)).toEqual(["Date", "Comment", "Photo", "Url"]);
 
   const nl = setup("nl");
-  nl.s.tables(new ReviewState([shares]));
-  expect(heads(nl.root)).toEqual(["Datum en tijd", "Gedeelde inhoud", "Link", "Methode"]);
+  nl.s.tables(new ReviewState([comments]));
+  expect(heads(nl.root)).toEqual(["Datum en tijd", "Reactie", "Foto", "Url"]);
 
   // A table the config does not know falls back to the raw column names.
   const raw = setup();
@@ -634,16 +637,18 @@ test("a short column is never squeezed below its floor and a long one never past
 
 test("a table wider than two columns scrolls sideways instead of widening the page", () => {
   const wide = setup();
-  wide.s.tables(new ReviewState([shares]));
+  const wideComments: Table = { id: "tiktok_comments", columns: ["Date", "Comment", "Photo", "Url"], rows: [["2024-01-01 09:00:00", "Nice video, love it!", "", "https://x/1"]] };
+  wide.s.tables(new ReviewState([wideComments]));
   const wideTable = wide.root.querySelector("[data-role=rows]") as HTMLElement;
   const wideCols = Array.prototype.slice.call(wide.root.querySelectorAll("[data-role=rows] colgroup col")) as HTMLElement[];
-  // Date is fixed at the date part (104), not the 176 its "2024-01-01 09:00:00"
+  // Date is fixed at the date part (104), not the 19 chars "2024-01-01 09:00:00"
   // would otherwise ask for; the other three are chars * 8 + 24 on the longer
-  // of the header and the widest cell: "Shared content" 14, Link 11, Method 6.
+  // of the header and the widest cell: Comment 20 ("Nice video, love it!"),
+  // Photo 5 (header only, the cell is empty), Url 11 ("https://x/1").
   expect(wideCols[1].style.width).toBe("104px");
-  // 44 (checkbox) + 104 + 136 + 112 + 72. Without the date rule this would be
-  // 540, and the extra 72px would come off the column being read.
-  expect(wideTable.style.minWidth).toBe("468px");
+  // 44 (checkbox) + 104 + 184 + 64 + 112. Comment is the widest column and is
+  // the one left unsized for table-fixed to hand the remainder to.
+  expect(wideTable.style.minWidth).toBe("508px");
   expect((wideTable.parentElement as HTMLElement).className).toContain("overflow-x-auto");
 
   const narrow = setup();

@@ -48,9 +48,9 @@ test("ambiguous basename counts as missing", () => {
   const e = openExport(zip({
     "TikTok/A/Watch History.txt": "Date: 1\nLink: a\n",
     "TikTok/B/Watch History.txt": "Date: 2\nLink: b\n",
-    "TikTok/Your Activity/Searches.txt": "Date: 1\nSearch Term: q\n",
+    "TikTok/Comments/Comments.txt": "Date: 1\nComment: q\n",
   }));
-  expect(e.kind === "txt" && Object.keys(e.files)).toEqual(["Searches.txt"]);
+  expect(e.kind === "txt" && Object.keys(e.files)).toEqual(["Comments.txt"]);
 });
 
 test("rejects a zip with none of the known files", () => {
@@ -104,7 +104,7 @@ test("loadExport reads a real File through FileReader", async () => {
   expect(e).toEqual({ kind: "json", data: { ok: true } });
 });
 
-test("TXT_FILES lists both languages for all 13 tables", () => {
+test("TXT_FILES lists both languages for all 7 tables plus the profile", () => {
   expect(TXT_FILES.nl.length).toBe(TXT_FILES.en.length);
   expect(TXT_FILES.en).toContain("Watch History.txt");
   expect(TXT_FILES.nl).toContain("Kijkgeschiedenis.txt");

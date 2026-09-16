@@ -97,7 +97,9 @@ test("the step buttons and the dropdown walk the tables together", async ({ page
 test("search, select all, Delete and Undo", async ({ page }) => {
   const app = await open(page);
   await pick(page, app, "json_en.zip");
-  await app.locator("[data-role=table-select]").selectOption({ index: 2 });
+  const select = app.locator("[data-role=table-select]");
+  const watchValue = await select.locator("option", { hasText: "Watch history" }).first().getAttribute("value");
+  await select.selectOption(watchValue as string);
   await expect(app.locator("[data-role=page-label]")).toHaveText("1/1");
   const before = await app.locator(".mt-row").count();
   // A search that narrows, so the summary line's "2 / 6 rows" is the signal

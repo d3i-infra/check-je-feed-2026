@@ -52,19 +52,6 @@ test("activity summary uses Dutch labels and priority keys", () => {
   ]);
 });
 
-test("settings joins keyword lists and errors when no content section", () => {
-  const exp = jsonExport({ "Profile And Settings": { Settings: { SettingsMap: { "Content Preferences": {
-    "Keyword filters for videos in For You feed": ["cats", "dogs"], "Keyword filters for videos in Following feed": [],
-  } } } } });
-  expect(extractTable("tiktok_settings", exp, counter()).rows).toEqual([
-    ["Zoekwoordfilter voor video's in uw Volgend-feed", ""],
-    ["Zoekwoordfilters voor video's in uw Voor Jou-feed", "cats, dogs"],
-  ]);
-  const c = counter();
-  expect(extractTable("tiktok_settings", jsonExport({ "Profile And Settings": { Settings: { SettingsMap: { Other: {} } } } }), c).rows).toEqual([]);
-  expect(Object.keys(c.errors).length).toBe(1);
-});
-
 test("comments redact emails and the username", () => {
   const exp = jsonExport({
     "Profile And Settings": { "Profile Info": { ProfileMap: { userName: "alice" } } },
@@ -75,21 +62,17 @@ test("comments redact emails and the username", () => {
   expect(comments.rows).toEqual([["2024-01-01 01:00:00", "hi [user], mail [email]", "", "https://x"]]);
 });
 
-test("ad interests reproduces the desktop column-count failure: always empty, error counted", () => {
-  const c = counter();
-  const exp = jsonExport({ "Your Activity": { "Ad Interests": [{ AdInterestCategories: "Cars" }] } });
-  expect(extractTable("tiktok_ad_interests", exp, c).rows).toEqual([]);
-  expect(Object.keys(c.errors).length).toBe(1);
-});
-
 test("runExtraction drops empty tables and keeps config order", () => {
   const exp = jsonExport({
-    "Your Activity": {
-      "Searches": { SearchList: [{ Date: "2024-01-01 00:00:00", SearchTerm: "q" }] },
-      "Watch History": { VideoList: [{ Date: "2024-01-01 00:00:00", Link: "l" }] },
-    },
+    "Likes and Favorites": { "Like List": { ItemFavoriteList: [{ Date: "2024-01-01 00:00:00", Link: "l" }] } },
+    "Your Activity": { "Watch History": { VideoList: [{ Date: "2024-01-01 00:00:00", Link: "l" }] } },
   });
-  expect(runExtraction(exp).tables.map((t) => t.id)).toEqual(["tiktok_watch_history", "tiktok_searches"]);
+  expect(runExtraction(exp).tables.map((t) => t.id)).toEqual(["tiktok_watch_history", "tiktok_like_list"]);
+});
+
+test("a dropped section is ignored, not extracted", () => {
+  const exp = jsonExport({ "Your Activity": { Searches: { SearchList: [{ Date: "2024-01-01 00:00:00", SearchTerm: "q" }] } } });
+  expect(runExtraction(exp).tables).toEqual([]);
 });
 
 test("username from JSON and from TXT profile", () => {

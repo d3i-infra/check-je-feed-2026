@@ -20,20 +20,17 @@ export const MAX_MEMBER_BYTES = 100 * 1024 * 1024;
 
 const JSON_FILES = ["user_data_tiktok.json", "user_data.json"];
 
-// Basenames the 13 extractors read, per language. Order does not matter.
+// Basenames the 7 extractors read, per language. Order does not matter.
 // Profile files carry the username for redaction. Mirrors the filenames in
 // packages/python/port/platforms/tiktok.py per extractor.
 export const TXT_FILES: { nl: string[]; en: string[] } = {
   nl: [
-    "Samenvatting van activiteit.txt", "Instellingen.txt", "Kijkgeschiedenis.txt",
-    "Favoriete video's.txt", "Volger.txt", "Volgend.txt", "Hashtag.txt", "Likelijst.txt",
-    "Zoekopdrachten.txt", "Geschiedenis delen.txt", "Reacties.txt",
-    "Activiteit buiten TikTok.txt", "Advertentie-interesses.txt", "Profielinformatie.txt",
+    "Samenvatting van activiteit.txt", "Kijkgeschiedenis.txt", "Favoriete video's.txt",
+    "Volger.txt", "Volgend.txt", "Likelijst.txt", "Reacties.txt", "Profielinformatie.txt",
   ],
   en: [
-    "Activity Summary.txt", "Settings.txt", "Watch History.txt", "Favorite Videos.txt",
-    "Follower.txt", "Following.txt", "Hashtag.txt", "Like List.txt", "Searches.txt",
-    "Share History.txt", "Comments.txt", "Off-TikTok Activities.txt", "Ad Interests.txt",
+    "Activity Summary.txt", "Watch History.txt", "Favorite Videos.txt",
+    "Follower.txt", "Following.txt", "Like List.txt", "Comments.txt",
     "Profile Information.txt",
   ],
 };

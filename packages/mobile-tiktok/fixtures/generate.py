@@ -31,7 +31,7 @@ from port.platforms import tiktok
 
 OUT = Path(__file__).resolve().parent / "generated"
 USERNAME = "synth_user_42"
-TEXT_COLUMNS = ["Comment", "SearchTerm", "SharedContent"]
+TEXT_COLUMNS = ["Comment"]
 
 # UTC instants around the 2026 DST changes plus ordinary ones, deliberately
 # not in chronological order so export-order handling is visible.
