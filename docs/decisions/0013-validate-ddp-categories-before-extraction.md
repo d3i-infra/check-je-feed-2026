@@ -27,7 +27,7 @@ companions:
 - Do not call `extract_data()` before validation or bypass `FlowBuilder.start_flow()` to reach extraction directly.
 - Keep each platform's `DDP_CATEGORIES` aligned with the files `extract_data()` actually reads.
 - Invalid validation returns the retry prompt; it is not an extraction error or traceback path.
-- The invariant is validate-before-extract, not `DDP_CATEGORIES` specifically. WhatsApp and Google are standing exceptions to the `DDP_CATEGORIES` contract, not to the ordering. WhatsApp's chat export is a single file, not a multi-file DDP, so it defines no `DDP_CATEGORIES` and validates through its own `validate_file()`. Google's Takeout archive has neither one filetype nor a stable filename set — the export format is chosen per source and filenames collide across folders — so `platforms/google.py` defines no `DDP_CATEGORIES` either; its `validate_ddp` recognizes the archive by matching folder-qualified member paths against the union inventory of the whole `ArchiveSet`, and still runs before extraction like every other platform's validator. (`example.py` is a non-normative template; its placeholder validator points at the `DDP_CATEGORIES` pattern.)
+- The invariant is validate-before-extract, not `DDP_CATEGORIES` specifically. A platform whose export is a single file or has no stable filename set may define no `DDP_CATEGORIES` and validate through its own `validate_file()` or `validate_ddp()` over the `ArchiveSet` instead; it still runs before extraction. This fork has no such platform; `example.py` is a non-normative template whose placeholder validator points at the `DDP_CATEGORIES` pattern.
 
 ## Why
 
@@ -35,5 +35,4 @@ Uploaded zips are routinely the wrong platform, wrong format, or corrupt, and ex
 
 ## Checks
 
-- Aside from the e2etest platforms (excluded from release builds, ADR-0004) and the non-normative `example.py` template, confirm `platforms/google.py` and `platforms/whatsapp.py` are the only modules under `port/platforms/` that define no `DDP_CATEGORIES`, and that each instead exposes its own validator (`validate_ddp` / `validate_file`).
-- Confirm `google.validate_ddp` takes an `ArchiveSet` and never calls `zipfile.ZipFile(...)` itself — recognition runs over `archive_set.members`, not a fresh unzip.
+- Aside from the e2etest platforms (excluded from release builds, ADR-0004) and the non-normative `example.py` template, confirm every module under `port/platforms/` defines `DDP_CATEGORIES` or exposes its own validator (`validate_ddp` / `validate_file`).
