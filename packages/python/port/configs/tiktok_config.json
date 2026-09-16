@@ -44,36 +44,6 @@
       }
     },
     {
-      "id": "tiktok_settings",
-      "title": {
-        "en": "Content preference keyword filters",
-        "nl": "Zoekwoordfilters voor contentvoorkeuren"
-      },
-      "description": {
-        "en": "Keyword filters applied to your Following and For You feeds.",
-        "nl": "Zoekwoordfilters die worden toegepast op je Volgend- en Voor Jou-feeds."
-      },
-      "headers": {
-        "Setting": {
-          "en": "Setting",
-          "nl": "Instelling"
-        },
-        "Keywords": {
-          "en": "Keywords",
-          "nl": "Trefwoorden"
-        }
-      },
-      "extractor": "settings_to_df",
-      "documentation": {
-        "summary": "Keyword filters applied to the participant's TikTok feeds.",
-        "source_file": "user_data_tiktok.json or user_data.json",
-        "columns": {
-          "Setting": "Name of the content preference setting.",
-          "Keywords": "Comma-separated list of keywords configured for this setting."
-        }
-      }
-    },
-    {
       "id": "tiktok_watch_history",
       "title": {
         "en": "Watch history",
@@ -194,36 +164,6 @@
       }
     },
     {
-      "id": "tiktok_hashtag",
-      "title": {
-        "en": "Hashtags",
-        "nl": "Hashtags"
-      },
-      "description": {
-        "en": "Hashtags associated with your TikTok activity.",
-        "nl": "Hashtags gekoppeld aan je TikTok-activiteit."
-      },
-      "headers": {
-        "HashtagName": {
-          "en": "Hashtag",
-          "nl": "Hashtag"
-        },
-        "HashtagLink": {
-          "en": "Link",
-          "nl": "Link"
-        }
-      },
-      "extractor": "hashtag_to_df",
-      "documentation": {
-        "summary": "Each row represents one hashtag associated with the participant's TikTok activity.",
-        "source_file": "user_data_tiktok.json or user_data.json",
-        "columns": {
-          "HashtagName": "Name of the hashtag.",
-          "HashtagLink": "URL link to the hashtag on TikTok."
-        }
-      }
-    },
-    {
       "id": "tiktok_like_list",
       "title": {
         "en": "Videos you liked",
@@ -250,87 +190,6 @@
         "columns": {
           "Date": "Timestamp of when the video was liked.",
           "Link": "URL of the liked TikTok video."
-        }
-      }
-    },
-    {
-      "id": "tiktok_searches",
-      "title": {
-        "en": "Searches",
-        "nl": "Zoekopdrachten"
-      },
-      "description": {
-        "en": "Search terms you have used on TikTok.",
-        "nl": "Zoektermen die je hebt gebruikt op TikTok."
-      },
-      "headers": {
-        "Date": {
-          "en": "Date",
-          "nl": "Datum en tijd"
-        },
-        "SearchTerm": {
-          "en": "Search term",
-          "nl": "Zoekterm"
-        }
-      },
-      "visualizations": [
-        {
-          "title": {
-            "en": "Most searched terms",
-            "nl": "Meest gezochte termen"
-          },
-          "type": "wordcloud",
-          "textColumn": "SearchTerm",
-          "tokenize": false
-        }
-      ],
-      "extractor": "searches_to_df",
-      "documentation": {
-        "summary": "Each row represents one search the participant performed on TikTok.",
-        "source_file": "user_data_tiktok.json or user_data.json",
-        "columns": {
-          "Date": "Timestamp of when the search was performed.",
-          "SearchTerm": "The search term entered by the participant."
-        }
-      }
-    },
-    {
-      "id": "tiktok_share_history",
-      "title": {
-        "en": "Share history",
-        "nl": "Deelgeschiedenis"
-      },
-      "description": {
-        "en": "Content you have shared on TikTok, including when, what, and how.",
-        "nl": "Inhoud die je hebt gedeeld op TikTok, inclusief wanneer, wat en hoe."
-      },
-      "headers": {
-        "Date": {
-          "en": "Date",
-          "nl": "Datum en tijd"
-        },
-        "SharedContent": {
-          "en": "Shared content",
-          "nl": "Gedeelde inhoud"
-        },
-        "Link": {
-          "en": "Link",
-          "nl": "Link"
-        },
-        "Method": {
-          "en": "Method",
-          "nl": "Methode"
-        }
-      },
-      "extractor": "share_history_to_df",
-      "documentation": {
-        "summary": "Each row represents one piece of content the participant shared on TikTok.",
-        "source_file": "user_data_tiktok.json or user_data.json",
-        "columns": {
-          "Date": "Timestamp of when the content was shared.",
-          "SharedContent": "Description of the shared content.",
-          "Link": "URL of the shared content.",
-          "Method": "Method used to share the content."
         }
       }
     },
@@ -382,66 +241,6 @@
           "Comment": "Text of the comment.",
           "Photo": "Photo associated with the comment, if any.",
           "Url": "URL of the video the comment was posted on."
-        }
-      }
-    },
-    {
-      "id": "tiktok_off_tiktok",
-      "title": {
-        "en": "Your off-TikTok activities",
-        "nl": "Je activiteiten buiten TikTok"
-      },
-      "description": {
-        "en": "Activities outside of TikTok that have been tracked by TikTok.",
-        "nl": "Activiteiten buiten TikTok die door TikTok zijn bijgehouden."
-      },
-      "headers": {
-        "Date": {
-          "en": "Date",
-          "nl": "Datum en tijd"
-        },
-        "Source": {
-          "en": "Source",
-          "nl": "Bron"
-        },
-        "Event": {
-          "en": "Event",
-          "nl": "Gebeurtenis"
-        }
-      },
-      "extractor": "off_tiktok_to_df",
-      "documentation": {
-        "summary": "Each row represents one activity the participant had outside of TikTok.",
-        "source_file": "user_data_tiktok.json or user_data.json",
-        "columns": {
-          "Date": "Timestamp of the activity.",
-          "Source": "The source of the activity.",
-          "Event": "Description of the activity event."
-        }
-      }
-    },
-    {
-      "id": "tiktok_ad_interests",
-      "title": {
-        "en": "Ad interests",
-        "nl": "Advertentie-interesses"
-      },
-      "description": {
-        "en": "Ad interests associated with your TikTok activity.",
-        "nl": "Advertentie-interesses gekoppeld aan je TikTok-activiteit."
-      },
-      "headers": {
-        "Interests": {
-          "en": "Interests",
-          "nl": "Interesses"
-        }
-      },
-      "extractor": "ad_interests_to_df",
-      "documentation": {
-        "summary": "Ad interest categories associated with the participant's TikTok activity.",
-        "source_file": "user_data_tiktok.json or user_data.json",
-        "columns": {
-          "Interests": "The ad interests associated with the participant's TikTok activity."
         }
       }
     }

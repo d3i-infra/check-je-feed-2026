@@ -19,3 +19,33 @@ def test_only_tiktok_and_test_platforms_remain():
 
 def test_only_tiktok_and_test_configs_remain():
     assert {p.name for p in CONFIGS.glob("*_config.json")} == EXPECTED_CONFIGS
+
+
+import json
+
+from port.platforms.tiktok import EXTRACTOR_REGISTRY
+
+KEPT_TABLES = [
+    "tiktok_activity_summary", "tiktok_watch_history", "tiktok_favorite_videos",
+    "tiktok_follower", "tiktok_following", "tiktok_like_list", "tiktok_comments",
+]
+KEPT_EXTRACTORS = [
+    "activity_summary_to_df", "watch_history_to_df", "favorite_videos_to_df",
+    "follower_to_df", "following_to_df", "like_list_to_df", "comments_to_df",
+]
+
+
+def test_tiktok_config_lists_the_seven_study_tables_in_order():
+    cfg = json.loads((CONFIGS / "tiktok_config.json").read_text())
+    assert [t["id"] for t in cfg["tables"]] == KEPT_TABLES
+    assert [t["extractor"] for t in cfg["tables"]] == KEPT_EXTRACTORS
+
+
+def test_tiktok_registry_matches_the_config():
+    assert list(EXTRACTOR_REGISTRY) == KEPT_EXTRACTORS
+
+
+def test_comments_table_carries_the_post_link():
+    cfg = json.loads((CONFIGS / "tiktok_config.json").read_text())
+    comments = [t for t in cfg["tables"] if t["id"] == "tiktok_comments"][0]
+    assert "Url" in comments["headers"]
