@@ -170,10 +170,11 @@ the desktop pages 7, and its outer pagination arrows go to the first and last pa
 where the desktop's jump ten. Search is a
 case-insensitive substring test on every cell; the desktop builds a regular expression.
 The phone shows one table at a time in config order; the desktop shows one table at a
-time in title order. The phone has no visualizations, no cell tooltip and no
-show/hide-table toggle. The payload is byte-identical to the desktop's: every table in
-config order, every non-deleted row keyed by the raw column names, and a "deleted row
-count" string per table, whatever the screen was showing.
+time in title order. The phone shows the over-time figure on the watch-history table,
+driven by the same shared config as the desktop's visualizations, but has no cell
+tooltip and no show/hide-table toggle. The payload is byte-identical to the desktop's:
+every table in config order, every non-deleted row keyed by the raw column names, and
+a "deleted row count" string per table, whatever the screen was showing.
 
 ### Flow
 

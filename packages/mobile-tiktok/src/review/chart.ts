@@ -28,7 +28,7 @@ function niceStep(max: number): number {
   const pow = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
   const m = raw / pow;
   const f = m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10;
-  return f * pow;
+  return Math.max(1, f * pow);
 }
 
 export function buildChart(b: Buckets, title: string, yLabel: string): SVGElement {

@@ -707,3 +707,55 @@ test("the Dutch screens read formally and speak of sharing", () => {
   s.intro();
   expect(root.textContent).toContain("Doneer uw TikTok-gegevens");
 });
+
+function figure(root: HTMLElement): HTMLElement | null {
+  return root.querySelector("[data-role=figure]") as HTMLElement | null;
+}
+
+test("the watch-history table shows the over-time figure above the search box", () => {
+  const { root, s } = setup("nl");
+  s.tables(new ReviewState([watchHistory(90)]));
+  const f = figure(root);
+  expect(f).not.toBeNull();
+  expect((f as HTMLElement).querySelector("h3")!.textContent).toBe("Bekeken video's in de loop van de tijd");
+  // watchHistory(90) spans 2024-01-01..2024-03-01, a 60-day range, which
+  // ReviewState.buckets (Task 2) buckets by week (its own threshold is a
+  // year): nine weekly buckets, three of them non-zero.
+  expect((f as HTMLElement).querySelectorAll("rect.mt-bar").length).toBe(9);
+  // Placed before the search input, after the description.
+  const card = (f as HTMLElement).parentElement as HTMLElement;
+  const order = Array.prototype.map.call(card.children, (c: Element) => c.tagName + (c.getAttribute("data-role") || "")) as string[];
+  expect(order.indexOf("DIVfigure")).toBeLessThan(order.indexOf("INPUT"));
+});
+
+test("a table without a chart in its config shows no figure", () => {
+  const { root, s } = setup();
+  s.tables(new ReviewState([comments]));
+  expect(figure(root)).toBeNull();
+});
+
+test("the figure follows deletions and search without a rebuild", () => {
+  const { root, s, renders } = setup();
+  const state = new ReviewState([watchHistory(90)]);
+  s.tables(state);
+  const before = renders();
+  expect((figure(root) as HTMLElement).querySelectorAll("rect.mt-bar").length).toBe(9);
+  state.setQuery(0, "2024-02");
+  s.tables(state);
+  expect((figure(root) as HTMLElement).querySelectorAll("rect.mt-bar").length).toBe(1);
+  expect(renders()).toBe(before + 1);
+  state.setQuery(0, "zzz");
+  s.tables(state);
+  expect(figure(root)).toBeNull();
+  state.setQuery(0, "");
+  s.tables(state);
+  expect((figure(root) as HTMLElement).querySelectorAll("rect.mt-bar").length).toBe(9);
+});
+
+test("the figure adds no div with an inline height and no table-shaped elements", () => {
+  const { root, s } = setup();
+  s.tables(new ReviewState([watchHistory(30)]));
+  const f = figure(root) as HTMLElement;
+  expect(f.style.height).toBe("");
+  expect(f.querySelectorAll(".mt-row, .mt-box, [data-role=rows], [data-role=summary]").length).toBe(0);
+});

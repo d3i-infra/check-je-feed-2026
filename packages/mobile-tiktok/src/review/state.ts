@@ -57,7 +57,9 @@ export interface TableState {
   // nothing on screen changing to say so.
   undoStack: number[][];
   // Cached alongside visibleCache and dropped with it. undefined = not
-  // computed yet; null = computed and there was nothing to bucket.
+  // computed yet; null = computed and there was nothing to bucket. The cache
+  // is per table and assumes one chart column per table; a second column
+  // would need a keyed cache.
   bucketsCache: Buckets | null | undefined;
 }
 
@@ -284,7 +286,9 @@ export class ReviewState {
       const cell = rows[visible[k]][col];
       if (cell === undefined || !DAY_PREFIX.test(cell)) continue;
       const dn = dayNumber(cell);
-      if (dn !== dn) continue; // NaN from an impossible date
+      // Date.UTC never yields NaN for digit-shaped input; kept as a cheap belt
+      // for a future parser change.
+      if (dn !== dn) continue;
       perDay[dn] = (perDay[dn] || 0) + 1;
       if (dn < minDn) minDn = dn;
       if (dn > maxDn) maxDn = dn;

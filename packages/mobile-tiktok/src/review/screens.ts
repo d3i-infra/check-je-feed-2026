@@ -1,7 +1,8 @@
 import { ReviewState, TableState } from "./state";
-import { TABLES, text } from "../config";
-import type { TableConfig } from "../config";
+import { TABLES, text, label } from "../config";
+import type { TableConfig, VisualizationConfig } from "../config";
 import { t, formatCount, Locale } from "../text";
+import { buildChart } from "./chart";
 
 export type ErrorKind = "extract_failed" | "unexpected";
 export type RetryKind = "too_large" | "not_tiktok" | "unreadable";
@@ -168,6 +169,7 @@ export class Screens {
   private summaryLineEl: HTMLElement | null = null;
   private selectAllEl: HTMLInputElement | null = null;
   private controlsEl: HTMLElement | null = null;
+  private figureEl: HTMLElement | null = null;
   private pageBars: HTMLElement[] = [];
   private rowsEl: HTMLElement | null = null;
   private renderedPage = -1;
@@ -194,6 +196,7 @@ export class Screens {
     this.summaryLineEl = null;
     this.selectAllEl = null;
     this.controlsEl = null;
+    this.figureEl = null;
     this.pageBars = [];
     this.rowsEl = null;
     this.renderedPage = -1;
@@ -402,6 +405,35 @@ export class Screens {
     b.addEventListener("click", () => this.h.onDeleteSelected(i));
     b.addEventListener("touchstart", () => undefined);
     line.appendChild(b);
+  }
+
+  // The first chart-shaped entry of the table's config, if its column exists.
+  private chartConfig(ts: TableState): VisualizationConfig | null {
+    const cfg = TABLES.filter((c) => c.id === ts.table.id)[0];
+    if (!cfg || !cfg.visualizations) return null;
+    for (const v of cfg.visualizations) {
+      const chart = v.type === "area" || v.type === "bar" || v.type === "line";
+      if (chart && v.group && ts.table.columns.indexOf(v.group.column) >= 0) return v;
+    }
+    return null;
+  }
+
+  // Fills (or empties) the figure block for the current visible rows. The
+  // buckets are cached by ReviewState and only recomputed after a deletion or
+  // a search, so calling this on every render costs the SVG alone.
+  private updateFigure(i: number, ts: TableState, state: ReviewState): void {
+    const box = this.figureEl;
+    if (!box) return;
+    const v = this.chartConfig(ts);
+    const b = v && v.group ? state.buckets(i, v.group.column) : null;
+    box.innerHTML = "";
+    if (!v || !b || b.keys.length === 0) { box.style.display = "none"; box.removeAttribute("data-role"); return; }
+    box.style.display = "";
+    box.setAttribute("data-role", "figure");
+    const title = text(v.title, this.locale);
+    const yLabel = label(v.values && v.values[0] ? v.values[0].label : undefined, "", this.locale);
+    box.appendChild(el("h3", "font-body text-bodymedium font-bold mb-1", title));
+    box.appendChild(buildChart(b, title, yLabel));
   }
 
   // The desktop's pagination.tsx: chevrons either side of a plain "page of
@@ -683,6 +715,7 @@ export class Screens {
       this.updateSummary(i, ts, state);
       this.updateControls(i, state);
       this.updatePageBars(i, state);
+      this.updateFigure(i, ts, state);
       if (this.selectAllEl) this.selectAllEl.checked = state.allVisibleSelected(i);
       this.renderRows(i, ts, state);
       this.finish();
@@ -701,6 +734,11 @@ export class Screens {
     // The desktop uses Title4 here; 28px is too wide a line at 375px.
     card.appendChild(el("h2", "font-title5 text-title5", this.tableTitle(ts)));
     if (cfg) card.appendChild(el("p", "font-body text-base mb-2", text(cfg.description, this.locale)));
+
+    const figureBox = el("div", "mb-3");
+    figureBox.setAttribute("data-role", "figure");
+    card.appendChild(figureBox);
+    this.figureEl = figureBox;
 
     const summaryLine = el("div", "flex items-center mb-2");
     card.appendChild(summaryLine);
@@ -744,6 +782,7 @@ export class Screens {
     this.updateSummary(i, ts, state);
     this.updateControls(i, state);
     this.updatePageBars(i, state);
+    this.updateFigure(i, ts, state);
     this.renderRows(i, ts, state);
 
     this.finish();
